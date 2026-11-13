@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+  <title>NearbyVisible</title>
+  <g transform="translate(20,5)">
+    <path d="M60 8 C31 8 8 31 8 60 C8 97 60 146 60 146 C60 146 112 97 112 60 C112 31 89 8 60 8 Z" fill="#22C55E"/>
+    <circle cx="60" cy="58" r="27" fill="#FFFFFF"/>
+    <circle cx="60" cy="58" r="17" fill="#111111"/>
+    <circle cx="66" cy="52" r="3.5" fill="#FFFFFF"/>
+  </g>
+</svg>

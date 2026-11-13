@@ -1,0 +1,10 @@
+node_modules
+.next
+out
+.env*
+*.tsbuildinfo
+next-env.d.ts
+.vercel
+
+# Personal Node.js practice, not part of the site
+/node
