@@ -4,6 +4,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ChatWidget } from "@/components/layout/ChatWidget";
 import { LocalBusinessJsonLd } from "@/components/JsonLd";
+import { MetaPixel } from "@/components/MetaPixel";
 import { site } from "@/lib/site";
 import "./globals.css";
 
@@ -17,7 +18,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
-    default: `${site.name} | ${site.tagline} Digital growth for your business`,
+    default: `${site.name} – Get found online`,
     template: `%s | ${site.name}`,
   },
   description: site.description,
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main id="main">{children}</main>
         <Footer />
         <ChatWidget />
+        <MetaPixel />
       </body>
     </html>
   );

@@ -12,7 +12,9 @@ type Menu = "services" | "company" | null;
 
 const company = [
   { href: "/about", label: "About us", text: "Who we are and why" },
+  { href: "/journey", label: "Your journey", text: "Every step, start to finish" },
   { href: "/work", label: "Our work", text: "Projects and results" },
+  { href: "/blog", label: "Blog", text: "Guides for business owners" },
   { href: "/faq", label: "FAQ", text: "Common questions" },
 ];
 
@@ -52,7 +54,7 @@ export function Header() {
     ? "home"
     : pathname.startsWith("/services")
       ? "services"
-      : ["/about", "/work", "/faq"].some((p) => pathname.startsWith(p))
+      : ["/about", "/journey", "/work", "/blog", "/faq"].some((p) => pathname.startsWith(p))
         ? "company"
         : pathname.startsWith("/contact")
           ? "contact"
@@ -117,12 +119,21 @@ export function Header() {
             )}
           </div>
 
+          <Link href="/pricing" className={tab(pathname === "/pricing")}>Pricing</Link>
           <Link href="/contact" className={tab(group === "contact")}>Contact</Link>
         </div>
 
         <div className="flex items-center gap-3">
-          <a href={site.whatsapp} className="hidden whitespace-nowrap rounded-full bg-brand px-5 py-3 text-[15px] font-semibold text-ink transition-transform hover:-translate-y-0.5 sm:inline-block">
-            Free Google audit
+          <Link href="/check" className="hidden items-center gap-2 whitespace-nowrap rounded-full border border-edge-dark px-5 py-3 text-[15px] font-semibold text-white transition-colors hover:border-brand hover:text-brand md:inline-flex">
+            <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="6" />
+              <path d="m20 20-4.5-4.5" />
+            </svg>
+            Get your free score
+          </Link>
+          <a href={site.whatsapp} className="hidden items-center gap-2 whitespace-nowrap rounded-full bg-brand px-5 py-3 text-[15px] font-semibold text-ink transition-transform hover:-translate-y-0.5 sm:inline-flex">
+            <svg viewBox="0 0 24 24" className="size-4" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.4Z"/></svg>
+            Chat on WhatsApp
           </a>
           <button
             type="button"
@@ -150,10 +161,15 @@ export function Header() {
           {company.map((c) => (
             <MobileLink key={c.href} href={c.href}>{c.label}</MobileLink>
           ))}
+          <MobileLink href="/pricing">Pricing</MobileLink>
           <MobileLink href="/contact">Contact</MobileLink>
-          <a href={site.whatsapp} className="mt-6 block rounded-full bg-brand px-5 py-4 text-center font-semibold text-ink">
-            Free Google audit
+          <a href={site.whatsapp} className="mt-6 flex items-center justify-center gap-2 rounded-full bg-brand px-5 py-4 font-semibold text-ink">
+            <svg viewBox="0 0 24 24" className="size-4" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.4Z"/></svg>
+            Chat on WhatsApp
           </a>
+          <Link href="/check" className="mt-3 block rounded-full border border-edge-dark px-5 py-4 text-center font-semibold text-white">
+            Get your free score
+          </Link>
         </div>
       )}
     </header>

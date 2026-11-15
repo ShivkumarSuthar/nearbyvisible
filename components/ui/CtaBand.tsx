@@ -17,7 +17,7 @@ export function CtaBand({
             Chat on WhatsApp
           </a>
           <a href={site.phoneTel} className="rounded-full border border-[#111111] px-7 py-4 text-[17px] font-semibold transition-colors hover:bg-[#111111] hover:text-white">
-            Call {site.phoneDisplay}
+            Call us
           </a>
         </div>
       </Reveal>

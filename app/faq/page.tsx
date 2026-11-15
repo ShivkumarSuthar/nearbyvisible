@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { PageHero } from "@/components/ui/PageHero";
-import { FaqList } from "@/components/ui/FaqList";
+import { FaqExplorer } from "@/components/ui/FaqExplorer";
 import { CtaBand } from "@/components/ui/CtaBand";
 import { faqs } from "@/lib/content";
 
@@ -20,8 +20,8 @@ export default function FaqPage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <PageHero eyebrow="FAQ" title="Questions business owners ask us." text="Short, honest answers. Still unsure? Ask us on WhatsApp." />
-      <section className="mx-auto max-w-[1000px] px-6 py-28">
-        <FaqList items={faqs} />
+      <section className="mx-auto max-w-[1240px] px-6 py-24">
+        <FaqExplorer />
       </section>
       <CtaBand title="Still have a question?" text="Message us on WhatsApp. A real person replies." />
     </>

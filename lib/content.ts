@@ -191,17 +191,6 @@ export const processSteps = [
   { title: "We grow it", text: "A simple report and improvements every month." },
 ];
 
-export const industries = [
-  "Plumbers and electricians",
-  "Clinics and doctors",
-  "Salons and spas",
-  "Restaurants and cafes",
-  "Shops and showrooms",
-  "Coaching and tuition",
-  "Hotels and travel",
-  "Contractors and repair services",
-];
-
 export const reasons = [
   { title: "Honest advice", text: "If you do not need a service, we tell you. You pay only for what helps." },
   { title: "One team for everything", text: "Logo to monthly growth, no running between five vendors." },
@@ -209,17 +198,182 @@ export const reasons = [
   { title: "Results you can see", text: "A plain-language report every month: views, calls, reviews." },
 ];
 
-export const faqs = [
-  { q: "What does NearbyVisible do?", a: "We help businesses get found online: branding, websites, apps, Google presence, growth and monthly support." },
-  { q: "Do I need all six services?", a: "No. We review each service with you and suggest only what helps. You choose." },
-  { q: "Do I need a website to show up on Google?", a: "Not always. A complete Google Business Profile can bring calls on its own. A website builds more trust and helps with search." },
-  { q: "How long does a Google profile take?", a: "Setup takes a few days. Verification depends on Google and can take longer." },
-  { q: "Can you guarantee the top position on Google?", a: "No one honestly can. We follow Google’s rules and do the work that helps you rank and get chosen." },
-  { q: "Will you post fake reviews?", a: "Never. We help you collect real reviews from real customers, as Google requires." },
-  { q: "Who owns my accounts?", a: "You do. Your Google profile, domain and pages stay in your name. We only manage them." },
-  { q: "How much does it cost?", a: "It depends on the services you choose. After a free review we share a clear quote." },
+export type Faq = { q: string; a: string };
+
+/** FAQ grouped by topic. Answers avoid promises we cannot keep: prices and timelines go in the written quote. */
+export const faqGroups: { id: string; title: string; items: Faq[] }[] = [
+  {
+    id: "start",
+    title: "Getting started",
+    items: [
+      { q: "What does NearbyVisible do?", a: "We help businesses get found online and turn that into calls and visits. That covers branding, websites, apps, your Google presence, growth work like reviews and social media, and monthly support." },
+      { q: "Who is this for?", a: "Any business whose customers search online before they call, visit or book. It does not matter what you sell. It matters how people find you." },
+      { q: "How do we start?", a: "Message us on WhatsApp or get your free Visibility Score on this site. We look at where you stand today, share what will help and what will not, and send a written plan and quote. Nothing starts until you say yes." },
+      { q: "Do I need all six services?", a: "No. We review each service with you and suggest only what will make a difference. Many businesses start with just their Google profile." },
+      { q: "What do you need from me?", a: "Your business details, a few real photos, access to any accounts you already have, and your approval before anything goes live. We handle the rest." },
+      { q: "Do we have to meet in person?", a: "No. Most of the work happens on WhatsApp and calls. If you prefer, we can also meet at your shop or office." },
+    ],
+  },
+  {
+    id: "google",
+    title: "Google and results",
+    items: [
+      { q: "Do I need a website to show up on Google?", a: "Not always. A complete Google Business Profile can bring calls on its own. A website adds trust, answers questions before customers call, and helps you appear in more searches." },
+      { q: "How long does a Google profile take?", a: "Setting it up takes a few days once we have your details. Verification is done by Google and can take longer. We guide you through every step." },
+      { q: "When will I see results?", a: "Some fixes, like a complete profile with correct timings and photos, can help quickly. Ranking higher builds over months through reviews, activity and good information. Your monthly report shows what is changing." },
+      { q: "Can you guarantee the top position on Google?", a: "No one honestly can. Google decides the order. We follow Google’s rules and do the work that helps you rank higher and get chosen." },
+      { q: "Will you post fake reviews?", a: "Never. Fake reviews can get a profile suspended. We help you collect real reviews from real customers with a simple link and routine." },
+      { q: "Someone else controls our Google profile, or it is suspended. Can you help?", a: "Yes. We help you request access or appeal through Google’s own process. The final decision is Google’s, and we keep you updated." },
+      { q: "What is the Visibility Score?", a: "A free tool on this site that looks at your Google profile, search position, website, SEO, reviews, contact options and whether AI tools recommend you, using public information. You get a score out of 100, with proof for every point." },
+    ],
+  },
+  {
+    id: "website",
+    title: "Websites and apps",
+    items: [
+      { q: "I already have a website. Do I need a new one?", a: "Not always. We check it first. Often fixing speed, content and contact buttons is enough. If a rebuild is better value, we explain why." },
+      { q: "Will my website work well on phones?", a: "Yes. Most customers search on their phones, so every site we build is designed for mobile first, with tap-to-call and WhatsApp buttons." },
+      { q: "Can I update the website myself?", a: "We can set it up so you can make simple changes, or we can handle updates for you on a monthly plan. Your choice." },
+      { q: "Do you build mobile apps?", a: "Yes, when an app truly helps, for example for bookings, orders or loyalty. For many businesses a fast website is enough, and we will tell you honestly." },
+    ],
+  },
+  {
+    id: "pricing",
+    title: "Pricing and payments",
+    items: [
+      { q: "How much does it cost?", a: "It depends on the services you choose. After a free review we send a written quote, item by item, so you see exactly what you pay for." },
+      { q: "Is the Visibility Score really free?", a: "Yes. No payment and no obligation. If you want help fixing what it finds, you can message us." },
+      { q: "How do payments work?", a: "Payment terms are written in your quote before any work starts, so there are no surprises." },
+      { q: "Are there monthly charges?", a: "Only if you choose a monthly plan, such as growth or maintenance. One-time work is charged once. Domain and hosting renew every year with the provider." },
+    ],
+  },
+  {
+    id: "trust",
+    title: "Ownership and trust",
+    items: [
+      { q: "Who owns my accounts?", a: "You do. Your Google profile, domain, website and social pages stay in your name. We only manage them with your permission." },
+      { q: "What happens if I stop working with you?", a: "Everything stays yours. We hand over every login and file we manage, so you can continue on your own or with anyone else." },
+      { q: "Is my information safe?", a: "We only ask for what the work needs and never share your details with anyone else." },
+    ],
+  },
 ];
+
+export const faqs: Faq[] = faqGroups.flatMap((g) => g.items);
 
 /** Replace these with real projects and client words. Empty arrays hide the sections. */
 export const projects: { client: string; service: string; summary: string; image?: string }[] = [];
 export const testimonials: { quote: string; name: string; business: string }[] = [];
+
+/** "Your journey" map and page. "get" is what the client actually receives at that stop. */
+export const journey = [
+  {
+    title: "Say hi on WhatsApp",
+    we: "Ask three quick questions: what you do, where you work, and who your customers are.",
+    you: "Your business name and area.",
+    get: "A real person on the other side.",
+  },
+  {
+    title: "Free Google check",
+    we: "Search for you the way a customer would, and compare you with the top three that show up.",
+    you: "Nothing. We do the looking.",
+    get: "Screenshots of where you stand, on WhatsApp.",
+  },
+  {
+    title: "Plan and quote",
+    we: "List what to fix first, what can wait, and what you do not need at all.",
+    you: "Pick what you want.",
+    get: "A written quote, item by item.",
+  },
+  {
+    title: "Preview first",
+    we: "Build your profile, website or app and share a preview link.",
+    you: "Photos, prices, timings and your OK.",
+    get: "A preview link to check before anything goes live.",
+  },
+  {
+    title: "Launch and handover",
+    we: "Go live, then hand over every login.",
+    you: "A short call to learn replies and updates.",
+    get: "All your logins, in your own name.",
+  },
+  {
+    title: "Monthly report",
+    we: "Track views, calls, direction requests and reviews.",
+    you: "Share new offers and photos when you have them.",
+    get: "A one-page report every month.",
+  },
+];
+
+/**
+ * Plans. Set `startingFrom` to a number (in rupees) to show "Starting from ₹X".
+ * Leave it null to show "Ask for price" instead.
+ */
+export type Plan = {
+  id: string;
+  name: string;
+  tagline: string;
+  billing: "one-time" | "per month";
+  startingFrom: number | null;
+  popular?: boolean;
+  includes: string[];
+  bestFor: string;
+};
+
+export const plans: Plan[] = [
+  {
+    id: "get-found",
+    name: "Get Found",
+    tagline: "Show up on Google and Maps.",
+    billing: "one-time",
+    startingFrom: 2999,
+    includes: [
+      "Google Business Profile created or fixed",
+      "Verification with Google’s own process",
+      "Right category, services and description",
+      "Photos, timings and links added",
+      "Exact Maps pin or service area",
+      "A review link to share with customers",
+      "Owner access stays with you",
+    ],
+    bestFor: "Not on Google yet, or the profile is incomplete.",
+  },
+  {
+    id: "get-chosen",
+    name: "Get Chosen",
+    tagline: "Look trusted and turn searches into calls.",
+    billing: "one-time",
+    startingFrom: 9999,
+    popular: true,
+    includes: [
+      "Everything in Get Found",
+      "A fast, mobile-first website",
+      "Domain, hosting and SSL in your name",
+      "Call and WhatsApp buttons on every page",
+      "Google search setup and Search Console",
+      "WhatsApp Business with catalogue and quick replies",
+      "Handover and a short training",
+    ],
+    bestFor: "Ready to look professional online.",
+  },
+  {
+    id: "grow-monthly",
+    name: "Grow Monthly",
+    tagline: "Keep growing, every month.",
+    billing: "per month",
+    startingFrom: 3999,
+    includes: [
+      "Posts, reels and Google updates on a schedule",
+      "A routine that keeps reviews coming",
+      "Google and Meta ads managed (ad budget is yours)",
+      "Website and Google profile updates",
+      "Security, backups and renewals tracked",
+      "A plain-language report every month",
+    ],
+    bestFor: "Already online and want steady new customers.",
+  },
+];
+
+export const addOns = [
+  { name: "Branding", slug: "branding", text: "Logo, colours, visiting card and a complete brand kit." },
+  { name: "App", slug: "app", text: "An Android and iOS app for bookings, orders or loyalty." },
+];

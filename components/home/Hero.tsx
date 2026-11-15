@@ -17,11 +17,11 @@ export function Hero() {
             Your customers are searching nearby right now. We make sure they see you, trust you, and call you first.
           </p>
           <div className="mt-2 flex flex-wrap gap-4">
-            <a href={site.whatsapp} className="rounded-full bg-brand px-7 py-4 text-[17px] font-semibold text-ink transition-transform hover:-translate-y-0.5">
-              Get a free Google audit
+            <a href="/check" className="rounded-full bg-brand px-7 py-4 text-[17px] font-semibold text-ink transition-transform hover:-translate-y-0.5">
+              Get your free Visibility Score →
             </a>
-            <a href="#story" className="rounded-full border border-edge-dark px-7 py-4 text-[17px] font-semibold text-white transition-colors hover:border-white">
-              Read Ramesh’s story
+            <a href={site.whatsapp} className="rounded-full border border-edge-dark px-7 py-4 text-[17px] font-semibold text-white transition-colors hover:border-white">
+              Talk on WhatsApp
             </a>
           </div>
         </Reveal>

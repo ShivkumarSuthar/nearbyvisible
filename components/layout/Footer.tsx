@@ -11,10 +11,10 @@ export function Footer() {
         <div className="flex flex-wrap items-center justify-between gap-6 rounded-[28px] border border-line-dark bg-ink-soft p-8">
           <div className="flex flex-col gap-1.5">
             <p className="font-display text-2xl font-semibold">Want more customers from Google?</p>
-            <p className="text-base text-muted-dark">Get a free review of your business on WhatsApp.</p>
+            <p className="text-base text-muted-dark">Get your free Visibility Score out of 100 in about 30 seconds.</p>
           </div>
-          <a href={site.whatsapp} className="whitespace-nowrap rounded-full bg-brand px-6 py-4 font-semibold text-ink transition-transform hover:-translate-y-0.5">
-            Get a free Google audit
+          <a href="/check" className="whitespace-nowrap rounded-full bg-brand px-6 py-4 font-semibold text-ink transition-transform hover:-translate-y-0.5">
+            Get your free Visibility Score
           </a>
         </div>
 
@@ -38,12 +38,14 @@ export function Footer() {
               <FooterLink href="/">Home</FooterLink>
               <FooterLink href="/about">About us</FooterLink>
               <FooterLink href="/work">Our work</FooterLink>
+              <FooterLink href="/pricing">Pricing</FooterLink>
+              <FooterLink href="/blog">Blog</FooterLink>
               <FooterLink href="/faq">FAQ</FooterLink>
               <FooterLink href="/contact">Contact</FooterLink>
             </FooterCol>
             <FooterCol title="Get in touch">
-              <a href={site.whatsapp} className="text-[15px] hover:text-brand">WhatsApp: {site.phoneDisplay}</a>
-              <a href={site.phoneTel} className="text-[15px] hover:text-brand">Call: {site.phoneDisplay}</a>
+              <a href={site.whatsapp} className="text-[15px] hover:text-brand">Chat on WhatsApp</a>
+              <a href={site.phoneTel} className="text-[15px] hover:text-brand">Call us</a>
               {site.email && <a href={`mailto:${site.email}`} className="text-[15px] hover:text-brand">{site.email}</a>}
               {site.hours && <span className="text-[15px] text-muted-dark">Hours: {site.hours}</span>}
             </FooterCol>

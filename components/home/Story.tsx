@@ -13,23 +13,23 @@ export function Story() {
     <div id="story">
       <section className="mx-auto flex max-w-[1240px] flex-col gap-5 px-6 pb-4 pt-32">
         <Reveal className="flex flex-col gap-5">
-          <p className="text-[15px] font-semibold tracking-wide text-brand-dark">The story</p>
-          <h2 className="max-w-[820px] font-display text-[clamp(36px,4.4vw,56px)] font-bold leading-[1.1] tracking-[-1px]">
-            This is Ramesh. His story may sound like yours.
+          <p className="text-[15px] font-semibold tracking-wide text-brand-dark">A story we see every week</p>
+          <h2 className="max-w-[860px] font-display text-[clamp(36px,4.4vw,56px)] font-bold leading-[1.1] tracking-[-1px]">
+            Meet Ramesh. He is not a real person. <span className="text-brand-dark">His problem is.</span>
           </h2>
         </Reveal>
       </section>
 
-      <Chapter number="01" title="A good plumber, known by word of mouth." visual={<ProfileCard />}>
+      <Chapter number="01" title="Twelve years of good work. Zero online." visual={<ProfileCard />}>
         <p>
-          Ramesh fixes leaks in Malviya Nagar. His customers trust him and call him again. But new customers only come
-          when an old one remembers his number.
+          Ramesh is the plumber people recommend. Old customers save his number and call him again. But every new job
+          depends on someone remembering to pass that number on.
         </p>
       </Chapter>
 
       <Chapter
         number="02"
-        title="Someone nearby needed him. They never found him."
+        title="9 pm. A pipe bursts two streets away."
         tone="mist"
         visualFirst
         visual={
@@ -41,33 +41,33 @@ export function Story() {
         }
       >
         <p>
-          Two streets away, a family searched “plumber near me”. They called the first name with photos and reviews.
-          Ramesh was better and closer, but he was not on the screen.
+          Water on the kitchen floor. Nobody in that house knows Ramesh, so they open Google and type “plumber near me”.
         </p>
-      </Chapter>
-
-      <Chapter number="03" title="Then Ramesh became visible." visual={<BeforeAfter />}>
         <p>
-          We set up his Google profile and Maps pin, gave him a simple website and a WhatsApp Business account, and
-          helped his happy customers leave reviews.
+          They call the first name with photos and reviews. Ramesh was closer and better. He never even knew this job
+          existed.
         </p>
       </Chapter>
 
       <Chapter
-        number="04"
-        title="Now, when someone nearby searches, they find Ramesh."
+        number="03"
+        title="Same Ramesh. Now he is the first call."
         tone="dark"
         visualFirst
         visual={
           <SearchCard
             id="search-after"
-            featured={{ name: "Ramesh Plumbing", detail: "Malviya Nagar, open now, reviews, website" }}
+            featured={{ name: "Ramesh Plumbing", detail: "Open now, real reviews, website" }}
             results={competitors.slice(0, 2)}
           />
         }
       >
-        <p>His work did not change. His visibility did. That is what we do for every business we work with.</p>
-        <p className="font-display text-2xl font-semibold text-brand">Get found nearby.</p>
+        <p>
+          A complete Google profile, a correct Maps pin, reviews from the customers who already loved him, and a WhatsApp
+          that answers when he is busy.
+        </p>
+        <p>His work did not change. Whether people could find it did.</p>
+        <p className="font-display text-2xl font-semibold text-brand">Your customers are searching tonight too.</p>
       </Chapter>
     </div>
   );
@@ -82,39 +82,15 @@ function ProfileCard() {
         </span>
         <div className="flex flex-col gap-1">
           <span className="text-[19px] font-semibold">Ramesh Plumbing</span>
-          <span className="text-[15px] text-gray-600">Plumbing services</span>
+          <span className="text-[15px] text-gray-600">Happy customers: many</span>
         </div>
       </div>
       <ul className="flex flex-col gap-2.5 border-t border-gray-200 pt-[18px] text-base text-gray-700">
-        <li>Online profile: none</li>
-        <li>Reviews: none</li>
-        <li>Website: none</li>
+        <li className="flex justify-between"><span>Google profile</span><span className="font-semibold text-red-600">None</span></li>
+        <li className="flex justify-between"><span>Reviews online</span><span className="font-semibold text-red-600">0</span></li>
+        <li className="flex justify-between"><span>Website</span><span className="font-semibold text-red-600">None</span></li>
+        <li className="flex justify-between"><span>New customers from search</span><span className="font-semibold text-red-600">0</span></li>
       </ul>
-    </div>
-  );
-}
-
-function BeforeAfter() {
-  return (
-    <div className="grid w-full max-w-[520px] grid-cols-1 gap-4 sm:grid-cols-2">
-      <div className="flex flex-col gap-3.5 rounded-3xl bg-mist p-6">
-        <span className="text-sm font-semibold text-gray-600">Before</span>
-        <ul className="flex flex-col gap-3.5 text-base text-gray-700">
-          <li>No Google profile</li>
-          <li>No reviews</li>
-          <li>No website</li>
-          <li>Only word of mouth</li>
-        </ul>
-      </div>
-      <div className="flex flex-col gap-3.5 rounded-3xl bg-ink p-6 text-white">
-        <span className="text-sm font-semibold text-brand">After</span>
-        <ul className="flex flex-col gap-3.5 text-base">
-          <li>Google profile and Maps pin</li>
-          <li>Reviews from real customers</li>
-          <li>Simple website</li>
-          <li>WhatsApp Business</li>
-        </ul>
-      </div>
     </div>
   );
 }

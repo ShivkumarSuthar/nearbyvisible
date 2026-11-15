@@ -18,7 +18,7 @@ export function Contact() {
             Chat on WhatsApp
           </a>
           <a href={site.phoneTel} className="rounded-full border border-edge-dark px-7 py-4 text-[17px] font-semibold text-white transition-colors hover:border-white">
-            Call {site.phoneDisplay}
+            Call us
           </a>
         </div>
       </Reveal>
