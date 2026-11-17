@@ -5,6 +5,7 @@ import { Footer } from "@/components/layout/Footer";
 import { ChatWidget } from "@/components/layout/ChatWidget";
 import { LocalBusinessJsonLd } from "@/components/JsonLd";
 import { MetaPixel } from "@/components/MetaPixel";
+import { WhatsAppForm } from "@/components/WhatsAppForm";
 import { site } from "@/lib/site";
 import "./globals.css";
 
@@ -40,6 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Footer />
         <ChatWidget />
         <MetaPixel />
+        <WhatsAppForm />
       </body>
     </html>
   );

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { SocialLinks } from "@/components/ui/SocialLinks";
 import { services } from "@/lib/content";
-import { site } from "@/lib/site";
+import { CALLBACK_TEXT, site, whatsappLink } from "@/lib/site";
 
 export function Footer() {
   return (
@@ -45,7 +45,7 @@ export function Footer() {
             </FooterCol>
             <FooterCol title="Get in touch">
               <a href={site.whatsapp} className="text-[15px] hover:text-brand">Chat on WhatsApp</a>
-              <a href={site.phoneTel} className="text-[15px] hover:text-brand">Call us</a>
+              <a href={whatsappLink(CALLBACK_TEXT)} className="text-[15px] hover:text-brand">Get a call back</a>
               {site.email && <a href={`mailto:${site.email}`} className="text-[15px] hover:text-brand">{site.email}</a>}
               {site.hours && <span className="text-[15px] text-muted-dark">Hours: {site.hours}</span>}
             </FooterCol>

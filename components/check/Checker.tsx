@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import type { PlaceSummary, Report } from "@/lib/audit/types";
 import { AuditReport } from "./AuditReport";
 import { track } from "@/components/MetaPixel";
@@ -31,8 +32,16 @@ async function post<T>(url: string, body: unknown): Promise<T> {
 }
 
 export function Checker() {
+  const searchParams = useSearchParams();
   const [form, setForm] = useState<Form>({ name: "", city: "", category: "", website: "" });
   const [stage, setStage] = useState<Stage>({ kind: "form" });
+
+  useEffect(() => {
+    const queryName = searchParams?.get("name") || searchParams?.get("q");
+    if (queryName) {
+      setForm((prev) => ({ ...prev, name: queryName }));
+    }
+  }, [searchParams]);
 
   async function search(e: React.FormEvent) {
     e.preventDefault();

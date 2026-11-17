@@ -21,7 +21,10 @@ export const site = {
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://nearbyvisible.vercel.app",
 } as const;
 
-/** WhatsApp link with a pre-filled message. */
+/** Message used by "Get a call back" links. The WhatsApp form sees it and pre-selects a call back. */
+export const CALLBACK_TEXT = "I would like a call back on WhatsApp.";
+
+/** WhatsApp link with a pre-filled message. On the site, clicks open the WhatsApp form first (components/WhatsAppForm). */
 export function whatsappLink(message?: string) {
   return message ? `${site.whatsapp}?text=${encodeURIComponent(message)}` : site.whatsapp;
 }

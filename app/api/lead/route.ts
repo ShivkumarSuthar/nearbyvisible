@@ -4,7 +4,7 @@ import { emailLead, parseLead } from "@/lib/leads";
 /** Receives every website form and emails it to the team. */
 export async function POST(req: Request) {
   if (!allow(`lead:${clientIp(req)}`, 10)) {
-    return Response.json({ error: "Too many requests today. Please call or WhatsApp us instead." }, { status: 429 });
+    return Response.json({ error: "Too many requests today. Please message us on WhatsApp instead." }, { status: 429 });
   }
   const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
   // Honeypot: real people never fill this hidden field.
@@ -18,6 +18,6 @@ export async function POST(req: Request) {
     return Response.json({ ok: true });
   } catch (e) {
     console.error("lead email failed", e);
-    return Response.json({ error: "We could not send your request. Please call or WhatsApp us instead." }, { status: 502 });
+    return Response.json({ error: "We could not send your request. Please message us on WhatsApp instead." }, { status: 502 });
   }
 }

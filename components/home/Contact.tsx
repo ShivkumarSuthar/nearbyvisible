@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { Reveal } from "@/components/ui/Reveal";
-import { site } from "@/lib/site";
+import { CALLBACK_TEXT, site, whatsappLink } from "@/lib/site";
 
 export function Contact() {
   return (
@@ -17,8 +17,8 @@ export function Contact() {
           <a href={site.whatsapp} className="rounded-full bg-brand px-7 py-4 text-[17px] font-semibold text-ink transition-transform hover:-translate-y-0.5">
             Chat on WhatsApp
           </a>
-          <a href={site.phoneTel} className="rounded-full border border-edge-dark px-7 py-4 text-[17px] font-semibold text-white transition-colors hover:border-white">
-            Call us
+          <a href={whatsappLink(CALLBACK_TEXT)} className="rounded-full border border-edge-dark px-7 py-4 text-[17px] font-semibold text-white transition-colors hover:border-white">
+            Get a call back
           </a>
         </div>
       </Reveal>

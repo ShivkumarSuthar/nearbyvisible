@@ -4,7 +4,6 @@ import type { Report, Status, TestResult } from "@/lib/audit/types";
 import { CATEGORIES } from "@/lib/audit/types";
 import { whatsappLink } from "@/lib/site";
 import { AiVisibility } from "./AiVisibility";
-import { track } from "@/components/MetaPixel";
 
 const STATUS: Record<Status, { label: string; cls: string }> = {
   PASS: { label: "Pass", cls: "bg-brand-tint text-brand-dark" },
@@ -32,7 +31,10 @@ export function AuditReport({ report, city, category, onReset }: { report: Repor
       <section className="grid grid-cols-1 gap-6 rounded-[32px] bg-ink p-8 text-white md:grid-cols-[auto_1fr] md:gap-10 md:p-10">
         <ScoreRing score={score} />
         <div className="flex flex-col justify-center gap-3">
-          <p className="text-sm font-semibold text-brand">Your Visibility Score</p>
+          <div className="inline-flex items-center gap-2 self-start rounded-full bg-brand/20 px-3 py-1 text-xs font-bold text-brand">
+            <span className="size-1.5 rounded-full bg-brand animate-pulse" />
+            180-Point Digital Visibility Audit
+          </div>
           <h2 className="font-display text-[clamp(26px,3.4vw,38px)] font-bold leading-tight">{business.name}</h2>
           <p className="text-muted-dark">{business.address}</p>
           <div className="mt-2 flex flex-wrap gap-2 text-sm">
@@ -43,7 +45,7 @@ export function AuditReport({ report, city, category, onReset }: { report: Repor
             <Chip>{counts.FAIL ?? 0} failed</Chip>
             {counts.NOT_TESTED ? <Chip>{counts.NOT_TESTED} not tested</Chip> : null}
           </div>
-          <p className="text-sm text-muted-dark">Checked {new Date(report.auditedAt).toLocaleString()}</p>
+          <p className="text-sm text-muted-dark">Scanned via Google Places & Lighthouse · {new Date(report.auditedAt).toLocaleString()}</p>
         </div>
       </section>
 
@@ -151,19 +153,43 @@ export function AuditReport({ report, city, category, onReset }: { report: Repor
       </section>
 
       {/* CTA */}
-      <section className="flex flex-col items-center gap-4 rounded-[32px] bg-brand-wash px-6 py-12 text-center">
-        <h3 className="font-display text-[clamp(26px,3.4vw,36px)] font-bold">Want us to fix this for you?</h3>
-        <p className="max-w-[520px] text-gray-700">Send this score on WhatsApp. We will explain the report and tell you what is worth fixing first.</p>
+      <section className="flex flex-col items-center gap-5 rounded-[32px] border-2 border-brand/30 bg-brand-wash px-6 py-12 text-center shadow-lg">
+        <span className="rounded-full bg-brand px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-ink">
+          Next Step: Get Found & Beat Competitors
+        </span>
+        <h3 className="font-display text-[clamp(26px,3.4vw,38px)] font-bold">
+          Want us to fix these issues for your business?
+        </h3>
+        <p className="max-w-[560px] text-base text-gray-700 sm:text-lg">
+          Send this 180-point audit to us on WhatsApp. We will explain your failed checks and create a customized action plan to outrank local competitors.
+        </p>
         <div className="flex flex-wrap justify-center gap-3">
-          <a href={whatsappLink(msg)} onClick={() => track("Contact", { content_name: "score_whatsapp" })} className="rounded-full bg-brand px-7 py-4 font-semibold text-ink transition-transform hover:-translate-y-0.5">
-            Send on WhatsApp
+          <a
+            href={whatsappLink(msg)}
+            className="flex items-center gap-2 rounded-full bg-brand px-8 py-4 font-semibold text-ink shadow-[0_8px_20px_-6px_rgba(34,197,94,0.6)] transition-transform hover:-translate-y-0.5"
+          >
+            <svg viewBox="0 0 24 24" className="size-5 fill-current" aria-hidden="true">
+              <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.4Z" />
+            </svg>
+            Send on WhatsApp for Fix Plan
           </a>
-          <button onClick={() => window.print()} className="rounded-full border border-[#111111] px-7 py-4 font-semibold hover:bg-[#111111] hover:text-white">
+          <button
+            onClick={() => window.print()}
+            className="rounded-full border border-[#111111] bg-white px-7 py-4 font-semibold text-ink hover:bg-[#111111] hover:text-white"
+          >
             Save as PDF
           </button>
-          <button onClick={onReset} className="rounded-full px-7 py-4 font-semibold text-brand-dark hover:underline">
+          <button
+            onClick={onReset}
+            className="rounded-full px-6 py-4 font-semibold text-brand-dark hover:underline"
+          >
             Check another business
           </button>
+        </div>
+        <div className="flex flex-wrap items-center justify-center gap-5 text-xs font-semibold text-gray-600">
+          <span>✓ Free 15-Min Consultation</span>
+          <span>✓ Honest Itemized Quote</span>
+          <span>✓ Zero Sales Pressure</span>
         </div>
       </section>
     </div>

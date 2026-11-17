@@ -1,7 +1,7 @@
-/** Server-only: validates a lead and emails it with Resend (REST API, no SDK needed). */
+/** Server-only: validates a lead and emails it with EmailJS (REST API, no SDK needed). */
 
 export type Lead = {
-  source: "service-request" | "contact" | "plan-quote";
+  source: "service-request" | "contact" | "plan-quote" | "whatsapp";
   name: string;
   phone: string;
   business?: string;
@@ -17,7 +17,7 @@ const clip = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slic
 
 export function parseLead(body: Record<string, unknown>): Lead | string {
   const source = body.source;
-  if (source !== "service-request" && source !== "contact" && source !== "plan-quote") return "Unknown form.";
+  if (source !== "service-request" && source !== "contact" && source !== "plan-quote" && source !== "whatsapp") return "Unknown form.";
   const name = clip(body.name, 80);
   const phone = clip(body.phone, 20);
   if (!name) return "Please add your name.";
@@ -40,15 +40,20 @@ const LABEL: Record<Lead["source"], string> = {
   "service-request": "Service request",
   contact: "Contact form",
   "plan-quote": "Plan quote",
+  whatsapp: "WhatsApp enquiry",
 };
 
-const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
-
 export async function emailLead(lead: Lead) {
-  const key = process.env.RESEND_API_KEY;
-  if (!key) throw new Error("RESEND_API_KEY is not set");
-  const to = process.env.LEAD_EMAIL_TO || "nearbyvisible@gmail.com";
-  const from = process.env.LEAD_EMAIL_FROM || "NearbyVisible Website <onboarding@resend.dev>";
+  const serviceId = process.env.EMAILJS_SERVICE_ID;
+  const templateId = process.env.EMAILJS_TEMPLATE_ID;
+  const publicKey = process.env.EMAILJS_PUBLIC_KEY;
+  const privateKey = process.env.EMAILJS_PRIVATE_KEY;
+
+  if (!serviceId || !templateId || !publicKey) {
+    throw new Error(
+      "EmailJS is not configured. Please set EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, and EMAILJS_PUBLIC_KEY in .env.local"
+    );
+  }
 
   const rows: [string, string | undefined][] = [
     ["Name", lead.name],
@@ -62,30 +67,40 @@ export async function emailLead(lead: Lead) {
     ["Sent from page", lead.page],
   ];
   const filled = rows.filter((r): r is [string, string] => Boolean(r[1]));
-  const digits = lead.phone.replace(/\D/g, "").slice(-10);
+  const text = filled.map(([k, v]) => `${k}: ${v}`).join("\n");
   const subject = `${LABEL[lead.source]}: ${lead.name}${lead.plan ? ` · ${lead.plan}` : lead.service ? ` · ${lead.service}` : ""}`;
 
-  const html = `
-  <div style="font-family:Arial,sans-serif;max-width:560px;color:#111">
-    <h2 style="margin:0 0 4px">${esc(LABEL[lead.source])}</h2>
-    <p style="margin:0 0 20px;color:#666">New lead from the NearbyVisible website</p>
-    <table style="border-collapse:collapse;width:100%">
-      ${filled
-        .map(([k, v]) => `<tr><td style="padding:8px 12px 8px 0;color:#666;vertical-align:top;white-space:nowrap">${esc(k)}</td><td style="padding:8px 0;white-space:pre-wrap">${esc(v)}</td></tr>`)
-        .join("")}
-    </table>
-    <p style="margin:24px 0 0">
-      <a href="tel:+91${digits}" style="background:#111;color:#fff;padding:10px 16px;border-radius:999px;text-decoration:none;margin-right:8px">Call</a>
-      <a href="https://wa.me/91${digits}" style="background:#22c55e;color:#0b0f0c;padding:10px 16px;border-radius:999px;text-decoration:none">WhatsApp</a>
-    </p>
-  </div>`;
-  const text = filled.map(([k, v]) => `${k}: ${v}`).join("\n");
+  const payload = {
+    service_id: serviceId,
+    template_id: templateId,
+    user_id: publicKey,
+    ...(privateKey ? { accessToken: privateKey } : {}),
+    template_params: {
+      name: lead.name,
+      phone: lead.phone,
+      business: lead.business || "",
+      city: lead.city || "",
+      service: lead.service || "",
+      plan: lead.plan || "",
+      intent: lead.intent || "",
+      message: lead.message || "",
+      details: text,
+      source: LABEL[lead.source],
+      subject,
+      page: lead.page || "",
+      to_email: process.env.LEAD_EMAIL_TO || "nearbyvisible@gmail.com",
+    },
+  };
 
-  const res = await fetch("https://api.resend.com/emails", {
+  const res = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
     method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from, to: [to], subject, html, text }),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
     signal: AbortSignal.timeout(10_000),
   });
-  if (!res.ok) throw new Error(`Resend error ${res.status}: ${(await res.text()).slice(0, 200)}`);
+
+  if (!res.ok) {
+    const err = await res.text().catch(() => "");
+    throw new Error(`EmailJS error ${res.status}: ${err.slice(0, 200)}`);
+  }
 }

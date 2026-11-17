@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { services } from "@/lib/content";
-import { site, whatsappLink } from "@/lib/site";
+import { CALLBACK_TEXT, site, whatsappLink } from "@/lib/site";
 import { Honeypot, useLeadForm } from "@/components/ui/useLeadForm";
 
 const AUTO_OPEN_AFTER_MS = 25_000;
@@ -150,11 +150,11 @@ function Menu({ onRequest, onNavigate }: { onRequest: () => void; onNavigate: ()
         </Icon>
         Chat on WhatsApp
       </a>
-      <a href={site.phoneTel} className={row}>
+      <a href={whatsappLink(CALLBACK_TEXT)} className={row}>
         <Icon>
           <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z" />
         </Icon>
-        Call us
+        Get a call back
       </a>
       <button type="button" onClick={onRequest} className={row}>
         <Icon>

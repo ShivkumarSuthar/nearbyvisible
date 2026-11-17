@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { PageHero } from "@/components/ui/PageHero";
 import { ContactForm } from "@/components/ContactForm";
-import { site } from "@/lib/site";
+import { CALLBACK_TEXT, site, whatsappLink } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -23,9 +23,9 @@ export default function ContactPage() {
             <span className="font-display text-[22px] font-semibold">Chat on WhatsApp</span>
             <span>The fastest way to reach us →</span>
           </a>
-          <a href={site.phoneTel} className="flex flex-col gap-1.5 rounded-3xl border border-gray-200 p-7 transition-colors hover:border-[#111111]">
-            <span className="font-display text-[22px] font-semibold">Call us</span>
-            <span className="text-gray-600">Talk to us directly →</span>
+          <a href={whatsappLink(CALLBACK_TEXT)} className="flex flex-col gap-1.5 rounded-3xl border border-gray-200 p-7 transition-colors hover:border-[#111111]">
+            <span className="font-display text-[22px] font-semibold">Get a call back</span>
+            <span className="text-gray-600">We call you on WhatsApp →</span>
           </a>
           <div className="flex flex-col gap-1.5 rounded-3xl border border-gray-200 p-7">
             <span className="font-display text-[22px] font-semibold">Visit</span>

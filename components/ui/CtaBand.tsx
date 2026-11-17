@@ -1,5 +1,5 @@
 import { Reveal } from "@/components/ui/Reveal";
-import { site } from "@/lib/site";
+import { CALLBACK_TEXT, site, whatsappLink } from "@/lib/site";
 
 type Props = { title?: string; text?: string };
 
@@ -16,8 +16,8 @@ export function CtaBand({
           <a href={site.whatsapp} className="rounded-full bg-brand px-7 py-4 text-[17px] font-semibold text-ink transition-transform hover:-translate-y-0.5">
             Chat on WhatsApp
           </a>
-          <a href={site.phoneTel} className="rounded-full border border-[#111111] px-7 py-4 text-[17px] font-semibold transition-colors hover:bg-[#111111] hover:text-white">
-            Call us
+          <a href={whatsappLink(CALLBACK_TEXT)} className="rounded-full border border-[#111111] px-7 py-4 text-[17px] font-semibold transition-colors hover:bg-[#111111] hover:text-white">
+            Get a call back
           </a>
         </div>
       </Reveal>

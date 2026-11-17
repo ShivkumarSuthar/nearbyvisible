@@ -224,7 +224,7 @@ export const faqGroups: { id: string; title: string; items: Faq[] }[] = [
       { q: "Can you guarantee the top position on Google?", a: "No one honestly can. Google decides the order. We follow Google’s rules and do the work that helps you rank higher and get chosen." },
       { q: "Will you post fake reviews?", a: "Never. Fake reviews can get a profile suspended. We help you collect real reviews from real customers with a simple link and routine." },
       { q: "Someone else controls our Google profile, or it is suspended. Can you help?", a: "Yes. We help you request access or appeal through Google’s own process. The final decision is Google’s, and we keep you updated." },
-      { q: "What is the Visibility Score?", a: "A free tool on this site that looks at your Google profile, search position, website, SEO, reviews, contact options and whether AI tools recommend you, using public information. You get a score out of 100, with proof for every point." },
+      { q: "What is the Visibility Score?", a: "A free audit that tests your business across 180+ digital checkpoints — including your Google Business Profile, local 3-pack rank against competitors, website speed via Google Lighthouse, technical SEO, reviews, and AI search visibility. You get an instant score out of 100 with measured proof for every single point." },
     ],
   },
   {
