@@ -13,21 +13,22 @@ export async function POST(req: Request) {
   const placeId = b.placeId?.trim();
   const name = b.name?.trim().slice(0, 120);
   const city = b.city?.trim().slice(0, 80);
-  if (!placeId || !/^[\w-]{10,300}$/.test(placeId) || !name || !city) {
-    return Response.json({ error: "Please pick your business from the list." }, { status: 400 });
-  }
+    if (!placeId || !/^[\w\-:%.~+]{5,300}$/.test(placeId) || !name || !city) {
+      return Response.json({ error: "Please pick your business from the list." }, { status: 400 });
+    }
 
-  try {
-    const report = await runAudit({
-      placeId,
-      name,
-      city,
-      category: b.category?.trim().slice(0, 80) || undefined,
-      website: b.website?.trim().slice(0, 300) || undefined,
-    });
-    return Response.json(report);
-  } catch (e) {
-    console.error("check/audit failed", e);
-    return Response.json({ error: "The check could not finish. Please try again.", detail: errorMessage(e) }, { status: 502 });
+    try {
+      const report = await runAudit({
+        placeId,
+        name,
+        city,
+        category: b.category?.trim().slice(0, 80) || undefined,
+        website: b.website?.trim().slice(0, 300) || undefined,
+        competitor: b.competitor?.trim().slice(0, 120) || undefined,
+      });
+      return Response.json(report);
+    } catch (e) {
+      console.error("check/audit failed", e);
+      return Response.json({ error: "The check could not finish. Please try again.", detail: errorMessage(e) }, { status: 502 });
+    }
   }
-}

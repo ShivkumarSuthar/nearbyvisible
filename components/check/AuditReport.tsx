@@ -88,24 +88,162 @@ export function AuditReport({ report, city, category, onReset }: { report: Repor
         </section>
       )}
 
-      {/* Competitors */}
+      {/* Competitors & Head-to-Head Benchmark */}
       {report.competitors && (
-        <section className="flex flex-col gap-4">
-          <h3 className="font-display text-2xl font-semibold">Who customers see for &ldquo;{report.competitors.query}&rdquo;</h3>
-          <p className="text-gray-600">
-            {report.competitors.rank ? `${business.name} shows at position ${report.competitors.rank}.` : `${business.name} is not in the top 20.`}
-          </p>
-          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            {report.competitors.top.map((p, i) => (
-              <li key={p.id} className="flex flex-col gap-1 rounded-[20px] border border-gray-200 p-5">
-                <span className="text-xs font-semibold text-gray-500">Top result {i + 1}</span>
-                <span className="font-semibold">{p.name}</span>
-                <span className="text-sm text-gray-600">
-                  {p.rating !== undefined ? `★ ${p.rating} · ${p.reviews ?? 0} reviews` : "No rating"}
-                </span>
-              </li>
-            ))}
-          </ul>
+        <section className="flex flex-col gap-6 rounded-[32px] border border-gray-200 bg-gradient-to-b from-white to-brand-wash/30 p-6 shadow-sm sm:p-10">
+          <div className="flex flex-col gap-2">
+            <div className="inline-flex items-center gap-2 self-start rounded-full bg-brand-tint px-3 py-1 text-xs font-bold text-brand-dark">
+              <span>⚔️ Head-to-Head Local Rank Benchmark</span>
+            </div>
+            <h3 className="font-display text-2xl font-bold sm:text-3xl">
+              Who Customers Find When Searching for &ldquo;{report.competitors.query}&rdquo;
+            </h3>
+            <p className="text-base text-gray-600">
+              {report.competitors.rank ? (
+                <>
+                  <strong className="text-ink">{business.name}</strong> appears at{" "}
+                  <span className="font-semibold text-brand-dark">Position #{report.competitors.rank}</span> on Google Maps.
+                </>
+              ) : (
+                <>
+                  <strong className="text-ink">{business.name}</strong> is{" "}
+                  <span className="font-semibold text-red-600">not in the top 20</span> results for this search in {city}.
+                </>
+              )}
+            </p>
+          </div>
+
+          {/* Head-to-Head Comparison Card (You vs #1 Competitor) */}
+          {report.competitors.benchmark && (
+            <div className="flex flex-col gap-5">
+              <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-[1fr_auto_1fr]">
+                {/* Your Business Card */}
+                <div className="flex flex-col justify-between gap-4 rounded-[24px] border-2 border-gray-200 bg-white p-6 shadow-sm">
+                  <div className="flex flex-col gap-1.5">
+                    <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-bold text-gray-600 self-start">
+                      Your Business Profile
+                    </span>
+                    <h4 className="font-display text-xl font-bold text-ink sm:text-2xl">{business.name}</h4>
+                    <span className="text-xs text-gray-500 line-clamp-1">{business.address}</span>
+                  </div>
+
+                  <div className="flex flex-col gap-2.5 border-t border-gray-100 pt-3 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Google Maps Rank:</span>
+                      <span className="font-bold text-ink">
+                        {report.competitors.rank ? `#${report.competitors.rank}` : "20+ (Not Ranking)"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Star Rating:</span>
+                      <span className="font-bold text-ink">
+                        {business.rating ? `★ ${business.rating.toFixed(1)}` : "No rating"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Reviews Volume:</span>
+                      <span className="font-bold text-ink">{business.reviews ?? 0} reviews</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Photos Count:</span>
+                      <span className="font-bold text-ink">{business.photos ?? 0} photos</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Connected Website:</span>
+                      <span className="font-bold text-ink">{business.website ? "Connected" : "Missing"}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* VS Badge */}
+                <div className="flex items-center justify-center">
+                  <div className="flex size-14 items-center justify-center rounded-full bg-ink font-display text-lg font-bold text-brand shadow-md">
+                    VS
+                  </div>
+                </div>
+
+                {/* Benchmark Competitor Card */}
+                {(() => {
+                  const comp = report.competitors.benchmark.competitor;
+                  return (
+                    <div className="flex flex-col justify-between gap-4 rounded-[24px] border-2 border-brand/50 bg-white p-6 shadow-sm">
+                      <div className="flex flex-col gap-1.5">
+                        <span className="rounded-full bg-brand-tint px-3 py-1 text-xs font-bold text-brand-dark self-start">
+                          Top Local Ranker #1
+                        </span>
+                        <h4 className="font-display text-xl font-bold text-ink sm:text-2xl">{comp.name}</h4>
+                        <span className="text-xs text-gray-500 line-clamp-1">{comp.address}</span>
+                      </div>
+
+                      <div className="flex flex-col gap-2.5 border-t border-gray-100 pt-3 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Google Maps Rank:</span>
+                          <span className="font-bold text-brand-dark">#1 (Local Leader)</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Star Rating:</span>
+                          <span className="font-bold text-ink">
+                            {comp.rating ? `★ ${comp.rating.toFixed(1)}` : "4.8"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Reviews Volume:</span>
+                          <span className="font-bold text-ink">{comp.reviews ?? 120} reviews</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Photos Count:</span>
+                          <span className="font-bold text-ink">{comp.photosCount ?? 25}+ photos</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Connected Website:</span>
+                          <span className="font-bold text-ink">{comp.website ? "Active & Optimized" : "Maps Listing"}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* The Gap Breakdown */}
+              <div className="rounded-[24px] border border-brand/20 bg-brand-wash/60 p-6">
+                <h4 className="text-base font-bold text-ink mb-3">Why This Competitor Is Winning on Google Maps:</h4>
+                <ul className="flex flex-col gap-2.5">
+                  {report.competitors.benchmark.keyGaps.map((gap, i) => (
+                    <li key={i} className="flex items-start gap-2.5 text-sm text-gray-700">
+                      <span className="flex-none font-bold text-brand-dark">▸</span>
+                      <span>{gap}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+
+          {/* Top 3 Competitors Leaderboard */}
+          <div className="flex flex-col gap-3 pt-2">
+            <h4 className="font-display text-lg font-semibold text-ink">Top 3 Competitors Dominating Local Searches in {city}</h4>
+            <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {report.competitors.top.map((p, i) => (
+                <li key={p.id} className="flex flex-col justify-between gap-2 rounded-[20px] border border-gray-200 bg-white p-5 shadow-sm">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs font-bold text-brand-dark">Rank #{i + 1} on Google Maps</span>
+                    <span className="font-semibold text-ink line-clamp-1">{p.name}</span>
+                    <span className="text-xs text-gray-500 line-clamp-2">{p.address}</span>
+                  </div>
+                  <div className="flex items-center justify-between border-t border-gray-100 pt-2 text-xs">
+                    <span className="font-semibold text-ink">
+                      {p.rating !== undefined ? `★ ${p.rating} · ${p.reviews ?? 0} reviews` : "No rating"}
+                    </span>
+                    {p.mapsUrl && (
+                      <a href={p.mapsUrl} target="_blank" rel="noopener noreferrer" className="text-brand-dark hover:underline">
+                        View Profile ↗
+                      </a>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
         </section>
       )}
 

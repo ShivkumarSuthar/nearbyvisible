@@ -14,7 +14,19 @@ export const CATEGORIES: Record<CategoryId, { name: string; weight: number }> = 
   leads: { name: "Lead generation", weight: 5 },
 };
 
-export type PlaceSummary = { id: string; name: string; address: string; rating?: number; reviews?: number };
+export type PlaceSummary = {
+  id: string;
+  name: string;
+  address: string;
+  rating?: number;
+  reviews?: number;
+  phone?: string;
+  website?: string;
+  typeLabel?: string;
+  mapsUrl?: string;
+  status?: string;
+  photosCount?: number;
+};
 
 export type PlaceDetails = PlaceSummary & {
   phone?: string;
@@ -84,14 +96,40 @@ export type TestResult = Omit<TestDef, "run"> & Outcome & { timestamp: string };
 
 export type CategoryScore = { id: CategoryId; name: string; weight: number; score: number | null; tested: number; total: number };
 
+export type CompetitorBenchmark = {
+  competitor: PlaceSummary;
+  rank: number | null;
+  reviewsDiff: number;
+  ratingDiff: number;
+  photosDiff: number;
+  keyGaps: string[];
+};
+
 export type Report = {
-  business: { name: string; address: string; mapsUrl?: string; website?: string; typeLabel?: string };
+  business: {
+    name: string;
+    address: string;
+    mapsUrl?: string;
+    website?: string;
+    typeLabel?: string;
+    phone?: string;
+    rating?: number;
+    reviews?: number;
+    photos?: number;
+    status?: string;
+  };
   score: number | null;
   coverage: number;
   confidence: "high" | "medium" | "low";
   categories: CategoryScore[];
   tests: TestResult[];
-  competitors: { query: string; rank: number | null; top: PlaceSummary[] } | null;
+  competitors: {
+    query: string;
+    rank: number | null;
+    top: PlaceSummary[];
+    target?: PlaceSummary;
+    benchmark?: CompetitorBenchmark;
+  } | null;
   limitations: string[];
   auditedAt: string;
 };

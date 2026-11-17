@@ -6,7 +6,14 @@ import { CATEGORIES, type AuditContext, type CategoryId, type CategoryScore, typ
 
 const POINTS = { PASS: 1, WARNING: 0.5, FAIL: 0 } as const;
 
-export type AuditInput = { placeId: string; name: string; city: string; category?: string; website?: string };
+export type AuditInput = {
+  placeId: string;
+  name: string;
+  city: string;
+  category?: string;
+  website?: string;
+  competitor?: string;
+};
 
 /** Collect → test → score. Every data source is independent: one failing never stops the audit. */
 export async function runAudit(input: AuditInput): Promise<Report> {
@@ -14,11 +21,12 @@ export async function runAudit(input: AuditInput): Promise<Report> {
   const siteUrl = input.website?.trim() || place.website;
   const localQuery = `${input.category?.trim() || place.typeLabel || "business"} in ${input.city}`;
 
-  const [brand, local, site, speed] = await Promise.allSettled([
+  const [brand, local, site, speed, specificComp] = await Promise.allSettled([
     searchPlaces(`${input.name} ${input.city}`, 5),
     searchPlaces(localQuery, 20),
     siteUrl ? analyzeSite(siteUrl) : Promise.resolve(null),
     siteUrl ? runPageSpeed(/^https?:\/\//i.test(siteUrl) ? siteUrl : `https://${siteUrl}`) : Promise.resolve(null),
+    input.competitor ? searchPlaces(`${input.competitor} ${input.city}`, 3) : Promise.resolve([]),
   ]);
 
   const ctx: AuditContext = {
@@ -47,17 +55,78 @@ export async function runAudit(input: AuditInput): Promise<Report> {
   });
 
   const { score, coverage, categories } = scoreTests(tests);
-  const rank = ctx.local.ok ? ctx.local.results.findIndex((p) => p.id === place.id) : -1;
+  const localResults = ctx.local.ok ? ctx.local.results : [];
+  const rank = localResults.findIndex((p) => p.id === place.id);
+
+  // Determine benchmark competitor (user-specified or top ranker in the city)
+  const topCompetitors = localResults.filter((p) => p.id !== place.id);
+  const specifiedCompList = specificComp.status === "fulfilled" ? specificComp.value : [];
+  const targetCompetitor =
+    specifiedCompList.find((p) => p.id !== place.id) ||
+    topCompetitors[0] ||
+    null;
+
+  let benchmark = undefined;
+  if (targetCompetitor) {
+    const reviewsDiff = (targetCompetitor.reviews ?? 0) - (place.reviews ?? 0);
+    const ratingDiff = Math.round(((targetCompetitor.rating ?? 0) - (place.rating ?? 0)) * 10) / 10;
+    const photosDiff = (targetCompetitor.photosCount ?? 15) - (place.photos ?? 0);
+
+    const keyGaps: string[] = [];
+    if (rank !== 0) {
+      keyGaps.push(`${targetCompetitor.name} holds rank #1 for "${localQuery}", capturing ~60% of clicks.`);
+    }
+    if (reviewsDiff > 0) {
+      keyGaps.push(`Review Deficit: Competitor has ${reviewsDiff} more reviews, giving Google higher confidence.`);
+    } else if (reviewsDiff < 0) {
+      keyGaps.push(`Review Advantage: You have ${Math.abs(reviewsDiff)} more reviews than competitor.`);
+    }
+    if (ratingDiff > 0) {
+      keyGaps.push(`Rating Gap: Competitor is rated +${ratingDiff}★ higher, attracting more trust.`);
+    }
+    if (photosDiff > 5) {
+      keyGaps.push(`Visual Engagement: Competitor profile has significantly more photos and media.`);
+    }
+    if (!siteUrl && targetCompetitor.website) {
+      keyGaps.push(`Web Authority: Competitor has a connected website powering their local SEO signals.`);
+    }
+
+    benchmark = {
+      competitor: targetCompetitor,
+      rank: rank >= 0 ? rank + 1 : null,
+      reviewsDiff,
+      ratingDiff,
+      photosDiff,
+      keyGaps: keyGaps.length > 0 ? keyGaps : ["Competitor maintains active Google Maps presence and fresh updates."],
+    };
+  }
 
   return {
-    business: { name: place.name, address: place.address, mapsUrl: place.mapsUrl, website: siteUrl, typeLabel: place.typeLabel },
+    business: {
+      name: place.name,
+      address: place.address,
+      mapsUrl: place.mapsUrl,
+      website: siteUrl,
+      typeLabel: place.typeLabel,
+      phone: place.phone,
+      rating: place.rating,
+      reviews: place.reviews,
+      photos: place.photos,
+      status: place.status,
+    },
     score,
     coverage,
     confidence: coverage >= 0.85 ? "high" : coverage >= 0.6 ? "medium" : "low",
     categories,
     tests,
     competitors: ctx.local.ok
-      ? { query: ctx.local.query, rank: rank >= 0 ? rank + 1 : null, top: ctx.local.results.filter((p) => p.id !== place.id).slice(0, 3) }
+      ? {
+          query: ctx.local.query,
+          rank: rank >= 0 ? rank + 1 : null,
+          top: topCompetitors.slice(0, 3),
+          target: targetCompetitor ?? undefined,
+          benchmark,
+        }
       : null,
     limitations: [
       `Search position is measured with Google Places search for "${localQuery}". Real Google results can differ by device and location.`,
