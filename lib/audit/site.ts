@@ -1,4 +1,5 @@
 import * as cheerio from "cheerio";
+import { parseRobots, robotsAllows } from "@/lib/ai/crawlers";
 import { safeFetch } from "./http";
 import type { SiteData } from "./types";
 
@@ -18,26 +19,29 @@ function collectTypes(node: unknown): string[] {
   return [...own, ...collectTypes(o["@graph"])];
 }
 
-/** True when the group for "User-agent: *" contains "Disallow: /". */
-function robotsBlocksAll(body: string) {
-  let applies = false;
-  let inAgents = false;
-  for (const raw of body.split(/\r?\n/)) {
-    const line = raw.replace(/#.*/, "").trim();
-    const i = line.indexOf(":");
-    if (i < 0) continue;
-    const key = line.slice(0, i).trim().toLowerCase();
-    const val = line.slice(i + 1).trim();
-    if (key === "user-agent") {
-      if (!inAgents) applies = false;
-      inAgents = true;
-      if (val === "*") applies = true;
-    } else {
-      inAgents = false;
-      if (applies && key === "disallow" && val === "/") return true;
-    }
-  }
-  return false;
+/**
+ * The website refused our automated request (bot protection, rate limit, maintenance) or did not answer in time.
+ * This is "not tested", not "broken": real visitors may see the site fine.
+ */
+export class SiteBlockedError extends Error {}
+
+const BLOCKED_STATUS = new Set([401, 403, 406, 429, 503]);
+const isTimeout = (e: unknown) => e instanceof Error && (e.name === "AbortError" || /timed out/i.test(e.message));
+const isUnreachable = (e: unknown) => /ENOTFOUND|EAI_AGAIN|ECONNREFUSED|ECONNRESET|EHOSTUNREACH|certificate|SSL/i.test(String((e as { code?: string })?.code ?? "") + " " + String((e as Error)?.message ?? ""));
+
+/** Runs tasks with at most `limit` at a time, so we do not hammer small websites. */
+async function pool<T, R>(items: T[], limit: number, fn: (x: T) => Promise<R>): Promise<R[]> {
+  const out: R[] = new Array(items.length);
+  let next = 0;
+  await Promise.all(
+    Array.from({ length: Math.min(limit, items.length) }, async () => {
+      while (next < items.length) {
+        const i = next++;
+        out[i] = await fn(items[i]);
+      }
+    }),
+  );
+  return out;
 }
 
 async function exists(url: string, check: (body: string) => boolean) {
@@ -54,10 +58,20 @@ export async function analyzeSite(input: string): Promise<SiteData> {
   const hasScheme = /^https?:\/\//i.test(input);
   let page;
   try {
-    page = await safeFetch(hasScheme ? input : `https://${input}`);
+    try {
+      page = await safeFetch(hasScheme ? input : `https://${input}`);
+    } catch (e) {
+      if (hasScheme) throw e;
+      page = await safeFetch(`http://${input}`);
+    }
   } catch (e) {
-    if (hasScheme) throw e;
-    page = await safeFetch(`http://${input}`);
+    if (isTimeout(e)) throw new SiteBlockedError("The website did not answer our check in time");
+    if (isUnreachable(e)) throw new Error("The website could not be reached (domain or server problem)");
+    if (/cannot be checked/i.test((e as Error).message)) throw new SiteBlockedError("This address cannot be checked");
+    throw e;
+  }
+  if (BLOCKED_STATUS.has(page.status)) {
+    throw new SiteBlockedError(`The website blocked our automated check (status ${page.status}). It may still open for visitors.`);
   }
   if (page.status >= 400) throw new Error(`The website answered with error ${page.status}`);
 
@@ -99,7 +113,8 @@ export async function analyzeSite(input: string): Promise<SiteData> {
   const origin = final.origin;
   const robotsRes = await exists(`${origin}/robots.txt`, (b) => /user-agent/i.test(b));
   const robotsBody = robotsRes?.body ?? "";
-  const blocksAll = robotsBlocksAll(robotsBody);
+  const googlebot = robotsAllows(parseRobots(robotsBody), "Googlebot", "/");
+  const blocksAll = !googlebot.allowed;
   const sitemapFromRobots = robotsBody.match(/^\s*sitemap:\s*(\S+)/im)?.[1];
   const sitemapUrl = sitemapFromRobots ?? `${origin}/sitemap.xml`;
   const sitemapRes = await exists(sitemapUrl, (b) => /<(urlset|sitemapindex)/i.test(b));
@@ -107,16 +122,16 @@ export async function analyzeSite(input: string): Promise<SiteData> {
   const internal = [...new Set(abs.filter((h) => new URL(h).origin === origin).map((h) => h.split("#")[0]))]
     .filter((h) => h !== final.toString())
     .slice(0, 10);
-  const linkResults = await Promise.all(
-    internal.map(async (h) => {
-      try {
-        const r = await safeFetch(h, { timeoutMs: 6000, maxBytes: 50_000 });
-        return r.status >= 400 ? h : null;
-      } catch {
-        return h;
-      }
-    }),
-  );
+  // Only clear failures count as broken: missing pages (404/410) or a dead server. Timeouts, rate limits and
+  // bot protection (401/403/429/5xx) are unknown, not broken.
+  const linkResults = await pool(internal, 3, async (h) => {
+    try {
+      const r = await safeFetch(h, { timeoutMs: 6000, maxBytes: 50_000 });
+      return r.status === 404 || r.status === 410 ? h : null;
+    } catch (e) {
+      return isUnreachable(e) ? h : null;
+    }
+  });
 
   $("script, style, noscript").remove();
   return {
@@ -133,13 +148,17 @@ export async function analyzeSite(input: string): Promise<SiteData> {
     imagesWithAlt: imgs.filter((_, el) => ($(el).attr("alt") ?? "").trim().length > 0).length,
     ldTypes,
     telLink: hrefs.some((h) => h.toLowerCase().startsWith("tel:")),
+    linkDigits: hrefs
+      .filter((h) => /^tel:|wa\.me\/|api\.whatsapp\.com|whatsapp:\/\//i.test(h))
+      .map((h) => h.replace(/\D/g, ""))
+      .join(" "),
     whatsappLink: abs.some((h) => /wa\.me\/|api\.whatsapp\.com|whatsapp:\/\//i.test(h)),
     form: $("form").length > 0,
     ctas,
     mapsLink: abs.some((h) => /google\.[a-z.]+\/maps|maps\.app\.goo\.gl|goo\.gl\/maps/i.test(h)) || $('iframe[src*="google.com/maps"]').length > 0,
     socials,
     text: $("body").text().replace(/\s+/g, " ").toLowerCase().slice(0, 300_000),
-    robots: { found: Boolean(robotsRes), blocksAll },
+    robots: { found: Boolean(robotsRes), blocksAll, rule: googlebot.rule },
     sitemap: { found: Boolean(sitemapRes), url: sitemapRes ? sitemapUrl : undefined },
     links: { checked: internal.length, broken: linkResults.filter((x): x is string => Boolean(x)) },
   };

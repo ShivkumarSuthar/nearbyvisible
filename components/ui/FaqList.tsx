@@ -26,7 +26,7 @@ export function FaqList({ items, openFirst = false }: { items: Faq[]; openFirst?
               aria-expanded={isOpen}
               className="flex w-full cursor-pointer items-center justify-between gap-6 px-6 py-5 text-left"
             >
-              <span className="font-display text-[18px] font-semibold leading-snug text-ink sm:text-[19px]">
+              <span className="font-display text-[1.125rem] font-semibold leading-snug text-ink sm:text-[1.1875rem]">
                 {f.q}
               </span>
               <span
@@ -49,7 +49,7 @@ export function FaqList({ items, openFirst = false }: { items: Faq[]; openFirst?
               </span>
             </button>
             {isOpen && (
-              <p className="max-w-[720px] px-6 pb-6 text-[16px] leading-relaxed text-gray-700 sm:text-[17px]">
+              <p className="max-w-[45rem] px-6 pb-6 text-[1rem] leading-relaxed text-gray-700 sm:text-[1.0625rem]">
                 {f.a}
               </p>
             )}

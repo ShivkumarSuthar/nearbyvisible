@@ -25,7 +25,7 @@ const SYSTEM = [
 /** One grounded Gemini answer: the text, the websites it used as sources and the searches it ran. */
 export async function askGemini(prompt: string): Promise<{ text: string; sources: Source[]; queries: string[] }> {
   const key = process.env.GEMINI_API_KEY;
-  if (!key) throw new Error("GEMINI_API_KEY is not set");
+  if (!key) throw new Error("The AI check is not switched on yet.");
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(geminiModel())}:generateContent`;
 
   const data = await withTimeout(async (signal) => {
@@ -42,7 +42,11 @@ export async function askGemini(prompt: string): Promise<{ text: string; sources
     });
     const json = (await res.json().catch(() => ({}))) as Raw;
     if (res.status === 429) throw new QuotaError("The free AI quota is used up for now. Try again later.");
-    if (!res.ok) throw new Error(`Gemini error ${res.status}: ${(json.error?.message ?? "").slice(0, 200)}`);
+    if (!res.ok) {
+      // Full error stays in the server log; customers only see a plain message.
+      console.error(`Gemini error ${res.status}: ${(json.error?.message ?? "").slice(0, 300)}`);
+      throw new Error("The AI check is not available right now. Please try again later.");
+    }
     return json;
   }, 40_000);
 

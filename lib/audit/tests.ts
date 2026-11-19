@@ -140,7 +140,12 @@ export const TESTS: TestDef[] = [
     source: "Direct request",
     weight: 3,
     fix: "Fix hosting or domain problems so the website loads for everyone.",
-    run: (c) => (c.site.state === "error" ? fail(c.site.error) : onSite(c, (s) => pass(`Loaded (status ${s.status})`))),
+    run: (c) =>
+      c.site.state === "error"
+        ? c.site.blocked
+          ? skip(c.site.error)
+          : fail(c.site.error)
+        : onSite(c, (s) => pass(`Loaded (status ${s.status})`)),
   },
   {
     id: "WEB_HTTPS",
@@ -234,7 +239,7 @@ export const TESTS: TestDef[] = [
     run: (c) =>
       onSite(c, (s) => {
         if (s.noindex) return fail("Page has a noindex tag");
-        if (s.robots.blocksAll) return fail("robots.txt blocks all crawlers");
+        if (s.robots.blocksAll) return fail("robots.txt blocks Google", s.robots.rule);
         return pass("Indexable");
       }),
   },
@@ -364,7 +369,9 @@ export const TESTS: TestDef[] = [
       onSite(c, (s) => {
         const phone = digits(c.place.phone).slice(-10);
         if (!phone) return skip("No phone on Google to compare");
-        return digits(s.text).includes(phone) ? pass("Phone matches") : fail("Google phone number not found on the website", c.place.phone);
+        return digits(s.text).includes(phone) || s.linkDigits.includes(phone)
+          ? pass("Phone matches")
+          : fail("Google phone number not found on the website", c.place.phone);
       }),
   },
   {
@@ -433,10 +440,12 @@ export const TESTS: TestDef[] = [
     weight: 2,
     fix: "Make asking for reviews a weekly habit.",
     run: (c) => {
-      if (!c.place.latestReview) return fail("No reviews found");
+      if (!c.place.latestReview) return (c.place.reviews ?? 0) > 0 ? skip("Google did not share review dates") : fail("No reviews yet");
       const d = daysSince(c.place.latestReview);
       const a = d === 0 ? "Latest review today" : `Latest review ${d} days ago`;
-      return d <= 90 ? pass(a) : d <= 365 ? warn(a) : fail(a);
+      // Google shares only 5 "most relevant" reviews, not the newest, so an old date here is a warning, not proof.
+      const note = "Based on the 5 reviews Google shares, which are not always the newest.";
+      return d <= 90 ? pass(a) : d <= 365 || (c.place.reviews ?? 0) > 5 ? warn(a, note) : fail(a, note);
     },
   },
 

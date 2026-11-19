@@ -1,3 +1,4 @@
+import { JsonLd } from "@/components/JsonLd";
 import type { Metadata } from "next";
 import { PageHero } from "@/components/ui/PageHero";
 import { FaqExplorer } from "@/components/ui/FaqExplorer";
@@ -18,9 +19,9 @@ export default function FaqPage() {
   };
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <JsonLd data={jsonLd} />
       <PageHero eyebrow="FAQ" title="Questions business owners ask us." text="Short, honest answers. Still unsure? Ask us on WhatsApp." />
-      <section className="mx-auto max-w-[1240px] px-6 py-24">
+      <section className="mx-auto max-w-[77.5rem] px-6 py-24">
         <FaqExplorer />
       </section>
       <CtaBand title="Still have a question?" text="Message us on WhatsApp. A real person replies." />

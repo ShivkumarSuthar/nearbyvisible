@@ -7,6 +7,23 @@ import { AuditReport } from "./AuditReport";
 import { track } from "@/components/MetaPixel";
 import { STATES_AND_CITIES } from "@/lib/locations";
 import { Combobox, type ComboboxOption } from "@/components/ui/Combobox";
+import { whatsappLink } from "@/lib/site";
+import { Turnstile, resetTurnstile, turnstileToken } from "@/components/ui/Turnstile";
+import { indianMobile } from "@/lib/phone";
+
+type AuditResponse = Report & {
+  share?: { ref: string; link: string } | null;
+  emailQueued?: boolean;
+};
+
+class ApiError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+  ) {
+    super(message);
+  }
+}
 
 type Form = {
   name: string;
@@ -14,14 +31,16 @@ type Form = {
   category: string;
   website: string;
   competitor: string;
+  phone: string;
+  email: string;
 };
 type Stage =
   | { kind: "form" }
   | { kind: "searching" }
   | { kind: "pick"; results: PlaceSummary[] }
   | { kind: "running"; place: PlaceSummary }
-  | { kind: "report"; report: Report }
-  | { kind: "error"; message: string };
+  | { kind: "report"; report: AuditResponse }
+  | { kind: "error"; message: string; retry: boolean };
 
 const STEPS = [
   "Finding you on Google Maps",
@@ -46,59 +65,23 @@ const POPULAR_QUICK_CHIPS = [
 const CATEGORY_GROUPS = [
   {
     group: "Home & Local Services",
-    items: [
-      "Plumber",
-      "Electrician",
-      "Carpenter",
-      "AC Repair & Service",
-      "Painter",
-      "Pest Control",
-      "Cleaning Service",
-      "Packers and Movers",
-    ],
+    items: ["Plumber", "Electrician", "Carpenter", "AC Repair & Service", "Painter", "Pest Control", "Cleaning Service", "Packers and Movers"],
   },
   {
     group: "Healthcare & Medical",
-    items: [
-      "Dental Clinic",
-      "Doctor / Clinic",
-      "Hospital",
-      "Pharmacy / Chemist",
-      "Diagnostics Lab",
-      "Physiotherapy Centre",
-      "Ayurvedic Clinic",
-    ],
+    items: ["Dental Clinic", "Doctor / Clinic", "Hospital", "Pharmacy / Chemist", "Diagnostics Lab", "Physiotherapy Centre", "Ayurvedic Clinic"],
   },
   {
     group: "Food, Dining & Stays",
-    items: [
-      "Restaurant",
-      "Cafe",
-      "Bakery & Cake Shop",
-      "Hotel / Resort / Guest House",
-      "Sweet Shop (Mithai)",
-      "Catering & Events",
-    ],
+    items: ["Restaurant", "Cafe", "Bakery & Cake Shop", "Hotel / Resort / Guest House", "Sweet Shop (Mithai)", "Catering & Events"],
   },
   {
     group: "Beauty, Wellness & Fitness",
-    items: [
-      "Salon / Beauty Parlour",
-      "Spa & Wellness Centre",
-      "Gym / Fitness Club",
-      "Yoga Studio",
-      "Makeup Artist",
-    ],
+    items: ["Salon / Beauty Parlour", "Spa & Wellness Centre", "Gym / Fitness Club", "Yoga Studio", "Makeup Artist"],
   },
   {
     group: "Automotive & Vehicles",
-    items: [
-      "Car Repair & Service",
-      "Bike / Two-Wheeler Service",
-      "Car Wash & Detailing",
-      "Tyre Shop",
-      "Auto Spare Parts",
-    ],
+    items: ["Car Repair & Service", "Bike / Two-Wheeler Service", "Car Wash & Detailing", "Tyre Shop", "Auto Spare Parts"],
   },
   {
     group: "Professional & Financial",
@@ -124,12 +107,7 @@ const CATEGORY_GROUPS = [
   },
   {
     group: "Education & Coaching",
-    items: [
-      "Coaching Institute",
-      "School / Play School",
-      "Computer Training Centre",
-      "Dance & Music Academy",
-    ],
+    items: ["Coaching Institute", "School / Play School", "Computer Training Centre", "Dance & Music Academy"],
   },
 ];
 
@@ -143,21 +121,36 @@ const CATEGORY_OPTIONS: ComboboxOption[] = CATEGORY_GROUPS.flatMap((g) =>
     value: item,
     label: item,
     group: g.group,
-  }))
+  })),
 );
 
 async function post<T>(url: string, body: unknown): Promise<T> {
-  const res = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error ?? "Something went wrong. Please try again.");
+  if (!res.ok) throw new ApiError(data.error ?? "Something went wrong. Please try again.", res.status);
   return data as T;
 }
 
 export function Checker() {
   const searchParams = useSearchParams();
-  const [form, setForm] = useState<Form>({ name: "", city: "", category: "", website: "", competitor: "" });
+  const [form, setForm] = useState<Form>({
+    name: "",
+    city: "",
+    category: "",
+    website: "",
+    competitor: "",
+    phone: "",
+    email: "",
+  });
   const [selectedState, setSelectedState] = useState("");
   const [stage, setStage] = useState<Stage>({ kind: "form" });
+  const [formError, setFormError] = useState("");
+  // Signed pass from the search step; the audit endpoint requires it.
+  const [pass, setPass] = useState("");
 
   useEffect(() => {
     const queryName = searchParams?.get("name") || searchParams?.get("q");
@@ -180,41 +173,84 @@ export function Checker() {
     setForm((prev) => ({ ...prev, city: "" }));
   }
 
-  async function search(e: React.FormEvent) {
+  async function search(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const formEl = e.currentTarget;
     if (!form.city.trim()) {
-      setStage({ kind: "error", message: "Please select or enter your city." });
+      setFormError("Please select your state and city.");
       return;
     }
+    if (!indianMobile(form.phone)) {
+      setFormError("Please add your 10-digit WhatsApp number so we can send you the report.");
+      return;
+    }
+    if (form.email.trim() && !/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(form.email.trim())) {
+      setFormError("Please check your email address, or leave it empty.");
+      return;
+    }
+    setFormError("");
     setStage({ kind: "searching" });
     track("Search", { search_string: form.category || "business" });
     try {
-      const { results } = await post<{ results: PlaceSummary[] }>("/api/check/search", form);
-      setStage(results.length ? { kind: "pick", results } : { kind: "error", message: "We could not find this business on Google Maps. Check the name and city, or message us and we will look manually." });
+      const token = await turnstileToken(formEl);
+      const { results, pass } = await post<{
+        results: PlaceSummary[];
+        pass: string;
+      }>("/api/check/search", { ...form, "cf-turnstile-response": token });
+      setPass(pass);
+      setStage(
+        results.length
+          ? { kind: "pick", results }
+          : {
+              kind: "error",
+              message: "We could not find this business on Google Maps. Check the name and city, or message us and we will look manually.",
+              retry: true,
+            },
+      );
     } catch (err) {
-      setStage({ kind: "error", message: (err as Error).message });
+      setStage(errorStage(err));
+    } finally {
+      resetTurnstile(formEl);
     }
   }
 
   async function audit(place: PlaceSummary) {
     setStage({ kind: "running", place });
     try {
-      const report = await post<Report>("/api/check/audit", { ...form, placeId: place.id });
+      const report = await post<AuditResponse>("/api/check/audit", {
+        ...form,
+        placeId: place.id,
+        pass,
+      });
       setStage({ kind: "report", report });
-      track("Lead", { content_name: "visibility_score", visibility_score: report.score ?? 0 });
+      // A finished free check is interest, not an enquiry: real leads are tracked when a form is sent.
+      track("ViewContent", {
+        content_name: "visibility_score",
+        content_category: form.category || "business",
+      });
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
-      setStage({ kind: "error", message: (err as Error).message });
+      setStage(errorStage(err));
     }
   }
 
   if (stage.kind === "report")
-    return <AuditReport report={stage.report} city={form.city} category={form.category} onReset={() => setStage({ kind: "form" })} />;
+    return (
+      <AuditReport
+        report={stage.report}
+        city={form.city}
+        category={form.category}
+        share={stage.report.share}
+        emailSent={Boolean(stage.report.emailQueued)}
+        onReset={() => setStage({ kind: "form" })}
+      />
+    );
 
   return (
-    <div className="mx-auto w-full max-w-[760px] rounded-[32px] border border-gray-200 bg-white p-6 shadow-[0_24px_60px_-30px_rgba(17,17,17,0.25)] sm:p-10">
+    <div className="mx-auto w-full max-w-[47.5rem] rounded-[32px] border border-gray-200 bg-white p-6 shadow-[0_24px_60px_-30px_rgba(17,17,17,0.25)] sm:p-10">
       {(stage.kind === "form" || stage.kind === "searching") && (
         <form onSubmit={search} className="flex flex-col gap-6">
+          <Turnstile />
           <div className="flex flex-col gap-5">
             {/* Business Name */}
             <Field
@@ -319,14 +355,52 @@ export function Checker() {
             )}
           </div>
 
+          {/* Contact: we keep a copy of the report and follow up. No OTP: it adds cost and drop-off for little gain. */}
+          <div className="flex flex-col gap-3 rounded-2xl bg-brand-wash p-4 sm:p-5">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Field
+                label="Your WhatsApp number"
+                required
+                type="tel"
+                inputMode="numeric"
+                autoComplete="tel-national"
+                maxLength={14}
+                value={form.phone}
+                onChange={(v) => setForm({ ...form, phone: v })}
+                placeholder="10-digit mobile number"
+              />
+              <Field
+                label="Email (optional)"
+                type="email"
+                autoComplete="email"
+                maxLength={120}
+                value={form.email}
+                onChange={(v) => setForm({ ...form, email: v })}
+                placeholder="you@example.com"
+              />
+            </div>
+            <p className="text-xs text-gray-600">
+              You can also get the report on WhatsApp after the check. We may call once to explain it. No spam. See our{" "}
+              <a href="/privacy" className="underline underline-offset-2">
+                privacy policy
+              </a>
+              .
+            </p>
+          </div>
+
+          {formError && (
+            <p role="alert" className="text-sm font-semibold text-red-600">
+              {formError}
+            </p>
+          )}
           <button
             type="submit"
             disabled={stage.kind === "searching"}
-            className="rounded-full bg-brand px-7 py-4 text-[17px] font-semibold text-ink shadow-[0_8px_20px_-6px_rgba(34,197,94,0.6)] transition-transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60"
+            className="rounded-full bg-brand px-7 py-4 text-[1.0625rem] font-semibold text-ink shadow-[0_8px_20px_-6px_rgba(34,197,94,0.6)] transition-transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60"
           >
             {stage.kind === "searching" ? "Searching Google Places…" : "Get my Visibility Score →"}
           </button>
-          <p className="text-center text-sm text-gray-500">Free 180-Point Audit. Uses public Google records. Takes ~30 seconds.</p>
+          <p className="text-center text-sm text-gray-500">Free check with 35+ tests. Uses public Google data. Takes about 30 seconds.</p>
         </form>
       )}
 
@@ -359,14 +433,10 @@ export function Checker() {
                     <h3 className="font-display text-xl font-bold text-ink group-hover:text-brand-dark sm:text-2xl">{p.name}</h3>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    {p.typeLabel && (
-                      <span className="rounded-full bg-mist px-3 py-1 text-xs font-semibold text-gray-700">
-                        {p.typeLabel}
-                      </span>
-                    )}
+                    {p.typeLabel && <span className="rounded-full bg-mist px-3 py-1 text-xs font-semibold text-gray-700">{p.typeLabel}</span>}
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-tint/70 px-2.5 py-1 text-xs font-medium text-brand-dark">
                       <span className="size-1.5 rounded-full bg-brand animate-pulse" />
-                      Google Maps Verified
+                      From Google Maps
                     </span>
                   </div>
                 </div>
@@ -410,11 +480,21 @@ export function Checker() {
                     >
                       <span>Open on Google Maps</span>
                       <svg viewBox="0 0 20 20" fill="currentColor" className="size-3.5">
-                        <path fillRule="evenodd" d="M4.25 5.5a.75.75 0 0 0-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 0 0 .75-.75v-4a.75.75 0 0 1 1.5 0v4A2.25 2.25 0 0 1 12.75 17h-8.5A2.25 2.25 0 0 1 2 14.75v-8.5A2.25 2.25 0 0 1 4.25 4h4a.75.75 0 0 1 0 1.5h-4Z" clipRule="evenodd" />
-                        <path fillRule="evenodd" d="M6.194 12.753a.75.75 0 0 0 1.06 1.06L13 8.06v2.69a.75.75 0 0 0 1.5 0v-5a.75.75 0 0 0-.75-.75h-5a.75.75 0 0 0 0 1.5h2.69l-5.246 5.253Z" clipRule="evenodd" />
+                        <path
+                          fillRule="evenodd"
+                          d="M4.25 5.5a.75.75 0 0 0-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 0 0 .75-.75v-4a.75.75 0 0 1 1.5 0v4A2.25 2.25 0 0 1 12.75 17h-8.5A2.25 2.25 0 0 1 2 14.75v-8.5A2.25 2.25 0 0 1 4.25 4h4a.75.75 0 0 1 0 1.5h-4Z"
+                          clipRule="evenodd"
+                        />
+                        <path
+                          fillRule="evenodd"
+                          d="M6.194 12.753a.75.75 0 0 0 1.06 1.06L13 8.06v2.69a.75.75 0 0 0 1.5 0v-5a.75.75 0 0 0-.75-.75h-5a.75.75 0 0 0 0 1.5h2.69l-5.246 5.253Z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                     </a>
-                  ) : <span />}
+                  ) : (
+                    <span />
+                  )}
 
                   <button
                     type="button"
@@ -433,7 +513,9 @@ export function Checker() {
           <div className="flex flex-col items-center justify-between gap-3 rounded-2xl bg-mist p-5 text-center sm:flex-row sm:text-left">
             <div>
               <p className="font-semibold text-ink">Can&apos;t find your exact business?</p>
-              <p className="text-xs text-gray-600">Try searching with your locality or landmark name (e.g. &ldquo;Ramesh Clinic Mansarovar&rdquo;).</p>
+              <p className="text-xs text-gray-600">
+                Try searching with your locality or landmark name (e.g. &ldquo;Ramesh Clinic Mansarovar&rdquo;).
+              </p>
             </div>
             <button
               type="button"
@@ -449,15 +531,41 @@ export function Checker() {
       {stage.kind === "running" && <Running name={stage.place.name} />}
 
       {stage.kind === "error" && (
-        <div className="flex flex-col items-start gap-4">
+        <div className="flex flex-col items-start gap-4" role="alert">
           <p className="text-lg text-gray-700">{stage.message}</p>
-          <button onClick={() => setStage({ kind: "form" })} className="rounded-full border border-[#111111] px-6 py-3 font-semibold hover:bg-[#111111] hover:text-white">
-            Try again
-          </button>
+          <div className="flex flex-wrap gap-3">
+            <a
+              href={whatsappLink(
+                `Hi, I tried the free Visibility Score for ${form.name || "my business"}${form.city ? ` in ${form.city}` : ""} but it did not work. Can you check it for me?`,
+              )}
+              className="rounded-full bg-brand px-6 py-3 font-semibold text-ink"
+            >
+              Message us on WhatsApp
+            </a>
+            {stage.retry && (
+              <button
+                type="button"
+                onClick={() => setStage({ kind: "form" })}
+                className="rounded-full border border-[#111111] px-6 py-3 font-semibold hover:bg-[#111111] hover:text-white"
+              >
+                Try again
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>
   );
+}
+
+function errorStage(err: unknown): Stage {
+  const offline = err instanceof TypeError;
+  return {
+    kind: "error",
+    message: offline ? "No internet connection. Please check your connection and try again." : (err as Error).message,
+    // After the daily limit (429) trying again only fails again.
+    retry: !(err instanceof ApiError && err.status === 429),
+  };
 }
 
 function Running({ name }: { name: string }) {
@@ -471,7 +579,7 @@ function Running({ name }: { name: string }) {
       <h2 className="font-display text-2xl font-semibold">Checking {name}…</h2>
       <ol className="flex flex-col gap-3">
         {STEPS.map((s, i) => (
-          <li key={s} className={`flex items-center gap-3 text-[17px] ${i <= step ? "text-[#111111]" : "text-gray-400"}`}>
+          <li key={s} className={`flex items-center gap-3 text-[1.0625rem] ${i <= step ? "text-[#111111]" : "text-gray-400"}`}>
             <span
               className={`flex size-6 flex-none items-center justify-center rounded-full text-xs font-bold ${
                 i < step ? "bg-brand text-ink" : i === step ? "animate-pulse bg-brand-tint text-brand-dark" : "bg-gray-100"
@@ -493,12 +601,20 @@ function Field({
   onChange,
   placeholder,
   required,
+  type = "text",
+  inputMode,
+  autoComplete,
+  maxLength = 120,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
   required?: boolean;
+  type?: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
+  autoComplete?: string;
+  maxLength?: number;
 }) {
   return (
     <label className="flex flex-col gap-2 text-sm font-semibold text-gray-700">
@@ -508,7 +624,10 @@ function Field({
       <input
         value={value}
         required={required}
-        maxLength={120}
+        type={type}
+        inputMode={inputMode}
+        autoComplete={autoComplete}
+        maxLength={maxLength}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className="rounded-2xl border border-gray-300 px-4 py-3.5 text-base font-normal text-[#111111] outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand-tint"

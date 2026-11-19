@@ -12,14 +12,10 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 const poppins = Poppins({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--font-poppins", display: "swap" });
 
-// Server-render every page on each request (SSR).
-// Remove this line to pre-render pages statically instead (faster, same SEO).
-export const dynamic = "force-dynamic";
-
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
-    default: `${site.name} – Get found online`,
+    default: `${site.name} – Get your business found online, across India`,
     template: `%s | ${site.name}`,
   },
   description: site.description,

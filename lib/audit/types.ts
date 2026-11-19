@@ -1,3 +1,4 @@
+import type { AiInput } from "@/lib/ai/types";
 export type Status = "PASS" | "WARNING" | "FAIL" | "NOT_TESTED";
 
 export type CategoryId = "search" | "maps" | "website" | "tech" | "local" | "social" | "reputation" | "leads";
@@ -26,6 +27,8 @@ export type PlaceSummary = {
   mapsUrl?: string;
   status?: string;
   photosCount?: number;
+  /** Position in the local "category in city" search, when it appeared there. */
+  rank?: number;
 };
 
 export type PlaceDetails = PlaceSummary & {
@@ -53,13 +56,15 @@ export type SiteData = {
   imagesWithAlt: number;
   ldTypes: string[];
   telLink: boolean;
+  /** Digits from tel: and WhatsApp links, so a phone shown only as a "Call" button still counts. */
+  linkDigits: string;
   whatsappLink: boolean;
   form: boolean;
   ctas: string[];
   mapsLink: boolean;
   socials: Partial<Record<"instagram" | "facebook" | "linkedin" | "youtube", string>>;
   text: string;
-  robots: { found: boolean; blocksAll: boolean };
+  robots: { found: boolean; blocksAll: boolean; rule?: string };
   sitemap: { found: boolean; url?: string };
   links: { checked: number; broken: string[] };
 };
@@ -75,7 +80,8 @@ export type AuditContext = {
   place: PlaceDetails;
   brand: Ok<{ ids: string[] }> | Err;
   local: Ok<{ query: string; results: PlaceSummary[] }> | Err;
-  site: { state: "none" } | { state: "error"; url: string; error: string } | { state: "ok"; data: SiteData };
+  /** blocked = the site refused or timed out on our automated request; real visitors may still see it fine. */
+  site: { state: "none" } | { state: "error"; url: string; error: string; blocked: boolean } | { state: "ok"; data: SiteData };
   speed: Ok<{ data: PageSpeed }> | Err | null;
 };
 
@@ -98,6 +104,9 @@ export type CategoryScore = { id: CategoryId; name: string; weight: number; scor
 
 export type CompetitorBenchmark = {
   competitor: PlaceSummary;
+  /** True when the visitor named this competitor; false when it is the top business in the local search. */
+  chosen: boolean;
+  /** The visitor's own position in the local search. */
   rank: number | null;
   reviewsDiff: number;
   ratingDiff: number;
@@ -132,4 +141,6 @@ export type Report = {
   } | null;
   limitations: string[];
   auditedAt: string;
+  /** Signed input for the follow-up AI check (/api/check/ai only accepts this exact input). */
+  ai: { input: AiInput; token: string };
 };

@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { track } from "@/components/MetaPixel";
 import { services } from "@/lib/content";
+import { HONEYPOT, indianMobile } from "@/lib/phone";
+import { Turnstile, resetTurnstile } from "@/components/ui/Turnstile";
 import { CALLBACK_TEXT, site } from "@/lib/site";
 
 const WA_LINK = /^https:\/\/(wa\.me|api\.whatsapp\.com)\//i;
@@ -55,10 +57,11 @@ function Dialog({ context, callback, onClose }: Open & { onClose: () => void }) 
 
   function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const d = Object.fromEntries(new FormData(e.currentTarget)) as Record<string, string>;
+    const formEl = e.currentTarget;
+    const d = Object.fromEntries(new FormData(formEl)) as Record<string, string>;
     const name = d.name?.trim() ?? "";
     const phone = d.phone?.trim() ?? "";
-    if (!name || phone.replace(/\D/g, "").length < 10) {
+    if (!name || !indianMobile(phone)) {
       setError("Please add your name and a 10-digit WhatsApp number.");
       return;
     }
@@ -78,7 +81,7 @@ function Dialog({ context, callback, onClose }: Open & { onClose: () => void }) 
     const url = `${site.whatsapp}?text=${encodeURIComponent(lines.join("\n"))}`;
 
     // Save the lead first. keepalive lets it finish even while WhatsApp takes over the screen.
-    if (!d.website) {
+    if (!d[HONEYPOT]) {
       fetch("/api/lead", {
         method: "POST",
         keepalive: true,
@@ -93,8 +96,10 @@ function Dialog({ context, callback, onClose }: Open & { onClose: () => void }) 
           intent: wantsCall ? "WhatsApp call back" : "WhatsApp chat",
           message: [d.message?.trim(), context].filter(Boolean).join("\n\n"),
           page: window.location.pathname,
+          // No waiting here: WhatsApp must open in this same click. The invisible check is normally done by now.
+          "cf-turnstile-response": d["cf-turnstile-response"] ?? "",
         }),
-      }).catch(() => {});
+      }).catch((err) => console.warn("Lead copy not saved", err));
     }
     try {
       localStorage.setItem(SAVED_KEY, JSON.stringify({ name, phone, business: d.business ?? "", city: d.city ?? "" }));
@@ -106,6 +111,7 @@ function Dialog({ context, callback, onClose }: Open & { onClose: () => void }) 
     // Open WhatsApp in the same click so browsers do not block it.
     window.open(url, "_blank", "noopener");
     setWaUrl(url);
+    resetTurnstile(formEl);
   }
 
   const input =
@@ -116,7 +122,7 @@ function Dialog({ context, callback, onClose }: Open & { onClose: () => void }) 
       ref={ref}
       onClose={onClose}
       onClick={(e) => e.target === ref.current && ref.current?.close()}
-      className="m-auto max-h-[calc(100dvh-32px)] w-[min(480px,calc(100vw-32px))] overflow-y-auto rounded-[28px] p-0 text-[#111111] shadow-[0_40px_100px_-30px_rgba(0,0,0,0.6)] backdrop:bg-ink/60 backdrop:backdrop-blur-sm"
+      className="m-auto max-h-[calc(100dvh-32px)] w-[min(30rem,calc(100vw-32px))] overflow-y-auto rounded-[28px] p-0 text-[#111111] shadow-[0_40px_100px_-30px_rgba(0,0,0,0.6)] backdrop:bg-ink/60 backdrop:backdrop-blur-sm"
     >
       <div className="flex flex-col gap-5 p-7">
         <div className="flex items-start justify-between gap-4">
@@ -143,7 +149,7 @@ function Dialog({ context, callback, onClose }: Open & { onClose: () => void }) 
 
         {waUrl ? (
           <div className="flex flex-col gap-4">
-            <p className="text-[17px] text-gray-700">
+            <p className="text-[1.0625rem] text-gray-700">
               We have your details. WhatsApp is open with your message ready — just tap <b>Send</b>.
             </p>
             <a
@@ -161,8 +167,9 @@ function Dialog({ context, callback, onClose }: Open & { onClose: () => void }) 
           </div>
         ) : (
           <form onSubmit={submit} noValidate className="relative flex flex-col gap-3">
-            <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute left-[-9999px] h-0 w-0 opacity-0" />
-            <p className="text-[15px] text-gray-600">A few details so we can help you faster. We reply on WhatsApp.</p>
+            <input type="text" name={HONEYPOT} tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute left-[-9999px] h-0 w-0 opacity-0" />
+            <Turnstile />
+            <p className="text-[0.9375rem] text-gray-600">A few details so we can help you faster. We reply on WhatsApp.</p>
             <input name="name" defaultValue={saved.name} placeholder="Your name" autoComplete="name" aria-label="Your name" className={input} />
             <input name="phone" defaultValue={saved.phone} type="tel" placeholder="WhatsApp number" autoComplete="tel" aria-label="WhatsApp number" className={input} />
             <div className="grid grid-cols-2 gap-3">
@@ -201,7 +208,7 @@ function Dialog({ context, callback, onClose }: Open & { onClose: () => void }) 
 
 function Choice({ name, value, label, defaultChecked }: { name: string; value: string; label: string; defaultChecked: boolean }) {
   return (
-    <label className="flex flex-1 cursor-pointer items-center gap-2.5 rounded-[14px] border border-gray-300 px-4 py-3 text-[15px] font-medium has-[:checked]:border-brand has-[:checked]:bg-brand-wash">
+    <label className="flex flex-1 cursor-pointer items-center gap-2.5 rounded-[14px] border border-gray-300 px-4 py-3 text-[0.9375rem] font-medium has-[:checked]:border-brand has-[:checked]:bg-brand-wash">
       <input type="radio" name={name} value={value} defaultChecked={defaultChecked} className="accent-[#22c55e]" />
       {label}
     </label>

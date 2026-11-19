@@ -13,8 +13,8 @@ type SearchCardProps = {
 
 export function SearchCard({ id, results, featured, missing }: SearchCardProps) {
   return (
-    <div className="flex w-full max-w-[400px] flex-col gap-3 rounded-[36px] bg-white p-6 text-[#111111] shadow-[0_24px_48px_-24px_rgba(17,17,17,0.2)]">
-      <label htmlFor={id} className="text-[13px] font-semibold text-gray-600">
+    <div className="flex w-full max-w-[25rem] flex-col gap-3 rounded-[36px] bg-white p-6 text-[#111111] shadow-[0_24px_48px_-24px_rgba(17,17,17,0.2)]">
+      <label htmlFor={id} className="text-[0.8125rem] font-semibold text-gray-600">
         Google search
       </label>
       <input
@@ -22,12 +22,12 @@ export function SearchCard({ id, results, featured, missing }: SearchCardProps) 
         type="text"
         value="plumber near me"
         readOnly
-        className="rounded-full border border-gray-300 bg-gray-50 px-[18px] py-3.5 text-[17px]"
+        className="rounded-full border border-gray-300 bg-gray-50 px-[18px] py-3.5 text-[1.0625rem]"
       />
       {featured && (
         <div className="flex flex-col gap-3 rounded-[18px] border-2 border-brand bg-brand-wash p-4">
           <div className="flex flex-col gap-1">
-            <span className="text-[17px] font-semibold">{featured.name}</span>
+            <span className="text-[1.0625rem] font-semibold">{featured.name}</span>
             <span className="text-sm text-gray-700">{featured.detail}</span>
           </div>
           <div className="flex flex-wrap gap-2 text-sm font-semibold">

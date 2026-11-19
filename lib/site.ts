@@ -2,13 +2,13 @@ export const site = {
   name: "NearbyVisible",
   tagline: "Get found nearby.",
   description:
-    "NearbyVisible helps businesses get found on Google, look trusted online, and turn searches into calls.",
+    "NearbyVisible helps local businesses across India get found on Google, look trusted online, and turn searches into calls.",
   phoneDisplay: "63772 90604",
   phoneE164: "+916377290604",
   phoneTel: "tel:+916377290604",
   whatsapp: "https://wa.me/916377290604",
   // Fill these in when ready. Empty values are hidden on the site.
-  email: "",
+  email: "nearbyvisible@gmail.com",
   hours: "",
   social: {
     instagram: "https://www.instagram.com/nearbyvisible",

@@ -21,10 +21,10 @@ export function Plans() {
                 }`}
               >
                 {dark && (
-                  <span className="absolute -top-3.5 left-8 rounded-full bg-brand px-3.5 py-1.5 text-[13px] font-bold text-ink">Most chosen</span>
+                  <span className="absolute -top-3.5 left-8 rounded-full bg-brand px-3.5 py-1.5 text-[0.8125rem] font-bold text-ink">Most chosen</span>
                 )}
                 <div className="flex flex-col gap-2">
-                  <h3 className="font-display text-[26px] font-bold">{p.name}</h3>
+                  <h3 className="font-display text-[1.625rem] font-bold">{p.name}</h3>
                   <p className={dark ? "text-muted-dark" : "text-gray-600"}>{p.tagline}</p>
                 </div>
 
@@ -33,21 +33,21 @@ export function Plans() {
                     <>
                       <span className={`text-sm font-semibold ${dark ? "text-muted-dark" : "text-gray-500"}`}>Starting from</span>
                       <span className="flex items-baseline gap-2">
-                        <span className="font-display text-[44px] font-bold leading-none tracking-[-1px]">{amount}</span>
+                        <span className="font-display text-[2.75rem] font-bold leading-none tracking-[-1px]">{amount}</span>
                         <span className={dark ? "text-muted-dark" : "text-gray-500"}>{p.billing === "per month" ? "/ month" : "one-time"}</span>
                       </span>
                     </>
                   ) : (
                     <>
                       <span className={`text-sm font-semibold ${dark ? "text-muted-dark" : "text-gray-500"}`}>{p.billing === "per month" ? "Monthly plan" : "One-time setup"}</span>
-                      <span className="font-display text-[32px] font-bold leading-tight">Ask for price</span>
+                      <span className="font-display text-[2rem] font-bold leading-tight">Ask for price</span>
                     </>
                   )}
                 </div>
 
                 <QuoteButtons plan={p.name} dark={dark} />
 
-                <ul className="flex flex-col gap-3 text-[15px]">
+                <ul className="flex flex-col gap-3 text-[0.9375rem]">
                   {p.includes.map((item) => (
                     <li key={item} className="flex gap-3">
                       <svg viewBox="0 0 24 24" className={`mt-0.5 size-5 flex-none ${dark ? "text-brand" : "text-brand-dark"}`} fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -73,13 +73,13 @@ export function Plans() {
         {addOns.map((a) => (
           <Link key={a.slug} href={`/services/${a.slug}`} className="group flex flex-col gap-1 rounded-[20px] bg-white p-5 transition-colors hover:bg-brand-wash">
             <span className="font-semibold">{a.name} →</span>
-            <span className="text-[15px] text-gray-600">{a.text}</span>
+            <span className="text-[0.9375rem] text-gray-600">{a.text}</span>
           </Link>
         ))}
       </div>
 
-      <p className="text-center text-[15px] text-gray-500">
-        Every quote is written, item by item, before work starts. Domain and hosting renew yearly with the provider.
+      <p className="text-center text-[0.9375rem] text-gray-500">
+        Every quote is written, item by item, before work starts. Domain and hosting are not included: you pay the provider directly, and they renew yearly.
       </p>
     </div>
   );

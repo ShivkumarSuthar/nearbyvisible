@@ -33,12 +33,11 @@ const pct = (v: number, of: number) => `${(v / of) * 100}%`;
 
 export function JourneyMap() {
   const reduce = useReducedMotion();
-  const draw = reduce ? { pathLength: 1 } : { pathLength: 0 };
 
   return (
     <>
       {/* Desktop / tablet: wide serpentine map */}
-      <div className="relative mx-auto hidden w-full max-w-[1100px] md:block" style={{ aspectRatio: `${W} / ${H}` }}>
+      <div className="relative mx-auto hidden w-full max-w-[68.75rem] md:block" style={{ aspectRatio: `${W} / ${H}` }}>
         <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full" aria-hidden>
           <path d={ROAD} fill="none" stroke="var(--color-line-dark)" strokeWidth={36} strokeLinecap="round" />
           <path d={ROAD} fill="none" stroke="var(--color-edge-dark)" strokeWidth={2} strokeDasharray="12 14" />
@@ -48,16 +47,16 @@ export function JourneyMap() {
             stroke="var(--color-brand)"
             strokeWidth={4}
             strokeLinecap="round"
-            initial={draw}
+            initial={{ pathLength: 0 }}
             whileInView={{ pathLength: 1 }}
             viewport={{ once: true, margin: "-20%" }}
-            transition={{ duration: 2.4, ease: "easeInOut" }}
+            transition={reduce ? { duration: 0 } : { duration: 2.4, ease: "easeInOut" }}
           />
         </svg>
 
         {/* Destination label under the pin */}
         <p
-          className="absolute whitespace-nowrap text-right font-display text-[clamp(18px,2.2vw,28px)] font-bold leading-tight text-white"
+          className="absolute whitespace-nowrap text-right font-display text-[clamp(1.125rem,2.2vw,1.75rem)] font-bold leading-tight text-white"
           style={{ right: pct(W - END - 22, W), top: pct(Y3 + 40, H) }}
         >
           Found. Trusted. <span className="text-brand">Called.</span>
@@ -69,20 +68,20 @@ export function JourneyMap() {
           return (
             <div key={s.title}>
               <motion.span
-                initial={reduce ? false : { scale: 0, opacity: 0 }}
+                initial={{ scale: 0, opacity: 0 }}
                 whileInView={{ scale: 1, opacity: 1 }}
                 viewport={{ once: true, margin: "-20%" }}
-                transition={{ delay: reduce ? 0 : 0.3 + i * 0.35, type: "spring", stiffness: 300, damping: 18 }}
-                className="absolute z-10 -ml-[22px] -mt-[22px] flex size-11 items-center justify-center rounded-full border-4 border-ink bg-brand font-display text-[15px] font-bold text-ink shadow-[0_0_0_6px_rgba(34,197,94,0.2)]"
+                transition={reduce ? { duration: 0 } : { delay: 0.3 + i * 0.35, type: "spring", stiffness: 300, damping: 18 }}
+                className="absolute z-10 -ml-[22px] -mt-[22px] flex size-11 items-center justify-center rounded-full border-4 border-ink bg-brand font-display text-[0.9375rem] font-bold text-ink shadow-[0_0_0_6px_rgba(34,197,94,0.2)]"
                 style={{ left: pct(p.x, W), top: pct(p.y, H) }}
               >
                 {i + 1}
               </motion.span>
               <motion.div
-                initial={reduce ? false : { opacity: 0, y: top ? 12 : -12 }}
+                initial={{ opacity: 0, y: top ? 12 : -12 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-20%" }}
-                transition={{ delay: reduce ? 0 : 0.4 + i * 0.35, duration: 0.5 }}
+                transition={reduce ? { duration: 0 } : { delay: 0.4 + i * 0.35, duration: 0.5 }}
                 className={`absolute flex w-[23%] flex-col gap-1 ${
                   p.x < 200 ? "text-left" : p.x > 800 ? "-translate-x-full text-right" : "-translate-x-1/2 text-center"
                 }`}
@@ -91,8 +90,8 @@ export function JourneyMap() {
                   ...(top ? { bottom: pct(H - p.y + 38, H) } : { top: pct(p.y + 38, H) }),
                 }}
               >
-                <h3 className="font-display text-[clamp(15px,1.7vw,20px)] font-semibold leading-tight text-white">{s.title}</h3>
-                <p className="text-[clamp(12px,1.25vw,15px)] leading-snug text-muted-dark">{s.get}</p>
+                <h3 className="font-display text-[clamp(0.9375rem,1.7vw,1.25rem)] font-semibold leading-tight text-white">{s.title}</h3>
+                <p className="text-[clamp(0.75rem,1.25vw,0.9375rem)] leading-snug text-muted-dark">{s.get}</p>
               </motion.div>
             </div>
           );
@@ -104,14 +103,14 @@ export function JourneyMap() {
         <span aria-hidden className="absolute bottom-3 left-[21px] top-3 w-[2px] bg-edge-dark" />
         {journey.map((s, i) => (
           <li key={s.title} className="relative">
-            <span className="absolute -left-14 top-0 flex size-11 items-center justify-center rounded-full border-4 border-ink bg-brand font-display text-[15px] font-bold text-ink">
+            <span className="absolute -left-14 top-0 flex size-11 items-center justify-center rounded-full border-4 border-ink bg-brand font-display text-[0.9375rem] font-bold text-ink">
               {i + 1}
             </span>
-            <h3 className="font-display text-[19px] font-semibold text-white">{s.title}</h3>
-            <p className="mt-1 text-[15px] leading-snug text-muted-dark">{s.get}</p>
+            <h3 className="font-display text-[1.1875rem] font-semibold text-white">{s.title}</h3>
+            <p className="mt-1 text-[0.9375rem] leading-snug text-muted-dark">{s.get}</p>
           </li>
         ))}
-        <li className="relative font-display text-[22px] font-bold text-white">
+        <li className="relative font-display text-[1.375rem] font-bold text-white">
           <span className="absolute -left-14 top-0 flex size-11 items-center justify-center rounded-full bg-brand text-ink">★</span>
           Found. Trusted. <span className="text-brand">Called.</span>
         </li>

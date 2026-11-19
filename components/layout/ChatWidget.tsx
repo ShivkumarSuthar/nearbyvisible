@@ -36,14 +36,41 @@ export function ChatWidget() {
   const [view, setView] = useState<View>("menu");
   const [auto, setAuto] = useState(false);
   const interacted = useRef(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const bubbleRef = useRef<HTMLButtonElement>(null);
 
-  // Escape closes the panel.
+  // Escape closes the panel, unless a popup (e.g. the WhatsApp form) is open on top: that Escape is for the popup.
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !document.querySelector("dialog[open]")) close();
+    };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   });
+
+  // Move focus into the panel when it opens (not for the automatic popup, which must not steal focus).
+  useEffect(() => {
+    if (open && !auto) panelRef.current?.focus();
+  }, [open, auto]);
+
+  // Never pop up on someone who is busy: typing in any form, or who has already sent one.
+  useEffect(() => {
+    const onFocus = (e: FocusEvent) => {
+      const t = e.target as Element | null;
+      if (t?.matches?.("input, textarea, select") && !panelRef.current?.contains(t)) interacted.current = true;
+    };
+    const onSubmit = () => {
+      interacted.current = true;
+      snooze();
+    };
+    document.addEventListener("focusin", onFocus);
+    document.addEventListener("submit", onSubmit, true);
+    return () => {
+      document.removeEventListener("focusin", onFocus);
+      document.removeEventListener("submit", onSubmit, true);
+    };
+  }, []);
 
   // Gently offer the request form once, after the visitor has spent some time on the page.
   useEffect(() => {
@@ -68,6 +95,7 @@ export function ChatWidget() {
   function close() {
     if (auto) snooze();
     setOpen(false);
+    bubbleRef.current?.focus();
   }
 
   return (
@@ -75,16 +103,18 @@ export function ChatWidget() {
       {open && (
         <div
           id="chat-panel"
+          ref={panelRef}
+          tabIndex={-1}
           role="dialog"
           aria-label="Contact NearbyVisible"
-          className="w-[360px] max-w-[calc(100vw-40px)] origin-bottom-right animate-[nv-pop_.22s_ease-out] rounded-[28px] bg-white p-5 shadow-[0_30px_80px_-20px_rgba(11,15,12,0.45)] ring-1 ring-black/5"
+          className="w-[22.5rem] max-w-[calc(100vw-40px)] origin-bottom-right outline-none animate-[nv-pop_.22s_ease-out] rounded-[28px] bg-white p-5 shadow-[0_30px_80px_-20px_rgba(11,15,12,0.45)] ring-1 ring-black/5"
         >
           <div className="flex items-start justify-between gap-4 px-1">
             <div className="flex flex-col gap-1">
-              <span className="font-display text-[19px] font-semibold text-[#111111]">
+              <span className="font-display text-[1.1875rem] font-semibold text-[#111111]">
                 {view === "request" ? "Request a service" : view === "sent" ? "Request received" : site.name}
               </span>
-              <span className="text-[14px] text-gray-500">
+              <span className="text-[0.875rem] text-gray-500">
                 {view === "request"
                   ? auto
                     ? "Need help getting more customers? Tell us in 20 seconds."
@@ -110,10 +140,10 @@ export function ChatWidget() {
           {view === "request" && <RequestForm onBack={auto ? undefined : () => setView("menu")} onSent={() => setView("sent")} />}
           {view === "sent" && (
             <div className="mt-5 flex flex-col gap-3">
-              <p className="rounded-2xl bg-brand-wash px-4 py-3 text-[15px] text-[#0f2e1a]">
+              <p className="rounded-2xl bg-brand-wash px-4 py-3 text-[0.9375rem] text-[#0f2e1a]">
                 We have your details and will call or message you shortly.
               </p>
-              <button type="button" onClick={() => setView("menu")} className="self-start text-[14px] font-semibold text-brand-dark hover:underline">
+              <button type="button" onClick={() => setView("menu")} className="self-start text-[0.875rem] font-semibold text-brand-dark hover:underline">
                 ← Back
               </button>
             </div>
@@ -122,6 +152,7 @@ export function ChatWidget() {
       )}
 
       <button
+        ref={bubbleRef}
         type="button"
         onClick={toggle}
         aria-expanded={open}
@@ -139,7 +170,7 @@ export function ChatWidget() {
 }
 
 const row =
-  "group flex w-full items-center gap-3.5 rounded-[18px] border border-gray-200 px-4 py-3.5 text-left text-[15px] font-semibold text-[#111111] transition-colors hover:border-brand hover:bg-brand-wash";
+  "group flex w-full items-center gap-3.5 rounded-[18px] border border-gray-200 px-4 py-3.5 text-left text-[0.9375rem] font-semibold text-[#111111] transition-colors hover:border-brand hover:bg-brand-wash";
 
 function Menu({ onRequest, onNavigate }: { onRequest: () => void; onNavigate: () => void }) {
   return (
@@ -186,7 +217,7 @@ function RequestForm({ onBack, onSent }: { onBack?: () => void; onSent: () => vo
   }, [state, onSent]);
 
   const input =
-    "w-full rounded-[14px] border border-gray-300 bg-white px-3.5 py-3 text-[15px] text-[#111111] outline-none focus:border-brand focus:ring-2 focus:ring-brand-tint";
+    "w-full rounded-[14px] border border-gray-300 bg-white px-3.5 py-3 text-[0.9375rem] text-[#111111] outline-none focus:border-brand focus:ring-2 focus:ring-brand-tint";
 
   return (
     <form onSubmit={onSubmit} noValidate className="relative mt-5 flex flex-col gap-3">
@@ -195,8 +226,9 @@ function RequestForm({ onBack, onSent }: { onBack?: () => void; onSent: () => vo
         <input name="name" aria-label="Your name" placeholder="Your name" autoComplete="name" className={input} />
         <input name="phone" aria-label="Phone or WhatsApp" placeholder="Phone / WhatsApp" type="tel" autoComplete="tel" className={input} />
       </div>
+      <input name="email" aria-label="Email (optional)" placeholder="Email (optional)" type="email" autoComplete="email" className={input} />
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-2 text-[13px] font-semibold text-gray-500">What do you need?</legend>
+        <legend className="mb-2 text-[0.8125rem] font-semibold text-gray-500">What do you need?</legend>
         <div className="flex flex-wrap gap-1.5">
           {["Not sure yet", ...services.map((s) => s.name)].map((name) => (
             <button
@@ -204,7 +236,7 @@ function RequestForm({ onBack, onSent }: { onBack?: () => void; onSent: () => vo
               type="button"
               aria-pressed={service === name}
               onClick={() => setService(name)}
-              className={`rounded-full border px-3 py-1.5 text-[13px] font-semibold transition-colors ${
+              className={`rounded-full border px-3 py-1.5 text-[0.8125rem] font-semibold transition-colors ${
                 service === name ? "border-ink bg-ink text-white" : "border-gray-200 text-gray-700 hover:border-gray-400"
               }`}
             >
@@ -215,19 +247,19 @@ function RequestForm({ onBack, onSent }: { onBack?: () => void; onSent: () => vo
       </fieldset>
       <textarea name="message" aria-label="Anything else" placeholder="Anything else? (optional)" rows={2} className={`${input} resize-none`} />
       {error && (
-        <p role="alert" className="text-[13px] font-medium text-red-700">
+        <p role="alert" className="text-[0.8125rem] font-medium text-red-700">
           {error}
         </p>
       )}
       <button
         type="submit"
         disabled={state === "sending"}
-        className="flex items-center justify-center gap-2 rounded-full bg-brand px-5 py-3.5 text-[15px] font-semibold text-ink transition-transform hover:-translate-y-0.5 disabled:opacity-60"
+        className="flex items-center justify-center gap-2 rounded-full bg-brand px-5 py-3.5 text-[0.9375rem] font-semibold text-ink transition-transform hover:-translate-y-0.5 disabled:opacity-60"
       >
         {state === "sending" ? "Sending…" : "Send request"}
       </button>
       {onBack && (
-        <button type="button" onClick={onBack} className="self-start text-[14px] font-semibold text-brand-dark hover:underline">
+        <button type="button" onClick={onBack} className="self-start text-[0.875rem] font-semibold text-brand-dark hover:underline">
           ← Back
         </button>
       )}

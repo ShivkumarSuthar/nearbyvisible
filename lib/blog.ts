@@ -89,6 +89,9 @@ export function getPost(slug: string): Post | null {
     if (depth === 2) headings.push({ id, text: text.replace(/<[^>]+>/g, "") });
     return `<h${depth} id="${id}">${text}</h${depth}>`;
   };
+  // Raw HTML in a post is shown as text, never run: the page injects this HTML directly, so a script tag or
+  // onerror attribute in a .md file (for example from a future CMS or guest author) must not execute.
+  renderer.html = ({ text }) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const html = marked.parse(body, { renderer, async: false }) as string;
   return { ...meta(file, data, body), html, headings };
 }

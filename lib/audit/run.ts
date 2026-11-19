@@ -1,8 +1,9 @@
+import { cleanAiInput, signAiInput } from "@/lib/ai/token";
 import { getPlace, runPageSpeed, searchPlaces } from "./google";
 import { errorMessage } from "./http";
-import { analyzeSite } from "./site";
+import { analyzeSite, SiteBlockedError } from "./site";
 import { TESTS } from "./tests";
-import { CATEGORIES, type AuditContext, type CategoryId, type CategoryScore, type Report, type TestResult } from "./types";
+import { CATEGORIES, type AuditContext, type CompetitorBenchmark, type CategoryId, type CategoryScore, type Report, type TestResult } from "./types";
 
 const POINTS = { PASS: 1, WARNING: 0.5, FAIL: 0 } as const;
 
@@ -41,7 +42,12 @@ export async function runAudit(input: AuditInput): Promise<Report> {
       ? { state: "none" }
       : site.status === "fulfilled" && site.value
         ? { state: "ok", data: site.value }
-        : { state: "error", url: siteUrl, error: site.status === "rejected" ? errorMessage(site.reason) : "Unknown error" },
+        : {
+            state: "error",
+            url: siteUrl,
+            error: site.status === "rejected" ? errorMessage(site.reason) : "Unknown error",
+            blocked: site.status === "rejected" && site.reason instanceof SiteBlockedError,
+          },
     speed: !siteUrl ? null : speed.status === "fulfilled" && speed.value ? { ok: true, data: speed.value } : { ok: false, error: speed.status === "rejected" ? errorMessage(speed.reason) : "Unknown error" },
   };
 
@@ -58,50 +64,66 @@ export async function runAudit(input: AuditInput): Promise<Report> {
   const localResults = ctx.local.ok ? ctx.local.results : [];
   const rank = localResults.findIndex((p) => p.id === place.id);
 
-  // Determine benchmark competitor (user-specified or top ranker in the city)
-  const topCompetitors = localResults.filter((p) => p.id !== place.id);
-  const specifiedCompList = specificComp.status === "fulfilled" ? specificComp.value : [];
-  const targetCompetitor =
-    specifiedCompList.find((p) => p.id !== place.id) ||
-    topCompetitors[0] ||
-    null;
+  // Every local result keeps its real position, so the report never relabels rank #3 as #2.
+  const ranked = localResults.map((p, i) => ({ ...p, rank: i + 1 }));
+  const topCompetitors = ranked.filter((p) => p.id !== place.id);
+  const ownRank = rank >= 0 ? rank + 1 : null;
 
-  let benchmark = undefined;
-  if (targetCompetitor) {
-    const reviewsDiff = (targetCompetitor.reviews ?? 0) - (place.reviews ?? 0);
-    const ratingDiff = Math.round(((targetCompetitor.rating ?? 0) - (place.rating ?? 0)) * 10) / 10;
-    const photosDiff = (targetCompetitor.photosCount ?? 15) - (place.photos ?? 0);
+  // A named competitor must actually match the name typed (not just the first search hit), and must not be this business.
+  const wanted = simplify(input.competitor ?? "");
+  const named = wanted
+    ? (specificComp.status === "fulfilled" ? specificComp.value : []).find(
+        (p) => p.id !== place.id && simplify(p.name) !== simplify(place.name) && (simplify(p.name).includes(wanted) || wanted.includes(simplify(p.name))),
+      )
+    : undefined;
+  const target = named ? { ...named, rank: ranked.find((p) => p.id === named.id)?.rank } : topCompetitors[0];
 
+  let benchmark: CompetitorBenchmark | undefined;
+  if (target) {
+    const reviewsDiff = (target.reviews ?? 0) - (place.reviews ?? 0);
+    const ratingDiff = target.rating !== undefined && place.rating !== undefined ? Math.round((target.rating - place.rating) * 10) / 10 : 0;
+    // Google returns at most 10 photos per business, so this is a sample, not the real total.
+    const photosDiff = (target.photosCount ?? 0) - (place.photos ?? 0);
+
+    const q = `"${localQuery}"`;
     const keyGaps: string[] = [];
-    if (rank !== 0) {
-      keyGaps.push(`${targetCompetitor.name} holds rank #1 for "${localQuery}", capturing ~60% of clicks.`);
+    if (target.rank && (!ownRank || ownRank > target.rank)) {
+      keyGaps.push(
+        `${target.name} is at position ${target.rank} for ${q}${ownRank ? `, you are at position ${ownRank}` : `, and you are not in the top ${localResults.length}`}. Most clicks go to the first few results.`,
+      );
+    } else if (target.rank && ownRank && ownRank < target.rank) {
+      keyGaps.push(`You are ahead: position ${ownRank} for ${q}, ${target.name} is at position ${target.rank}.`);
+    } else if (!target.rank) {
+      keyGaps.push(`${target.name} is not in the top ${localResults.length} for ${q} either.`);
     }
-    if (reviewsDiff > 0) {
-      keyGaps.push(`Review Deficit: Competitor has ${reviewsDiff} more reviews, giving Google higher confidence.`);
-    } else if (reviewsDiff < 0) {
-      keyGaps.push(`Review Advantage: You have ${Math.abs(reviewsDiff)} more reviews than competitor.`);
-    }
-    if (ratingDiff > 0) {
-      keyGaps.push(`Rating Gap: Competitor is rated +${ratingDiff}★ higher, attracting more trust.`);
-    }
-    if (photosDiff > 5) {
-      keyGaps.push(`Visual Engagement: Competitor profile has significantly more photos and media.`);
-    }
-    if (!siteUrl && targetCompetitor.website) {
-      keyGaps.push(`Web Authority: Competitor has a connected website powering their local SEO signals.`);
-    }
+    if (reviewsDiff > 0) keyGaps.push(`Reviews: ${target.name} has ${reviewsDiff} more Google reviews than you.`);
+    else if (reviewsDiff < 0) keyGaps.push(`Reviews: you have ${Math.abs(reviewsDiff)} more Google reviews than ${target.name}.`);
+    if (ratingDiff > 0) keyGaps.push(`Rating: ${target.name} is rated ${ratingDiff}★ higher than you.`);
+    else if (ratingDiff < 0) keyGaps.push(`Rating: you are rated ${Math.abs(ratingDiff)}★ higher than ${target.name}.`);
+    if (!siteUrl && target.website) keyGaps.push(`Website: ${target.name} has a website linked to its Google profile, you do not.`);
 
     benchmark = {
-      competitor: targetCompetitor,
-      rank: rank >= 0 ? rank + 1 : null,
+      competitor: target,
+      chosen: Boolean(named),
+      rank: ownRank,
       reviewsDiff,
       ratingDiff,
       photosDiff,
-      keyGaps: keyGaps.length > 0 ? keyGaps : ["Competitor maintains active Google Maps presence and fresh updates."],
+      keyGaps: keyGaps.length ? keyGaps : [`You and ${target.name} look evenly matched on rank, reviews and rating.`],
     };
   }
 
+  const aiInput = cleanAiInput({
+    name: place.name,
+    city: input.city,
+    category: input.category?.trim() || place.typeLabel || "business",
+    address: place.address,
+    website: siteUrl,
+    mapsUrl: place.mapsUrl,
+  });
+
   return {
+    ai: { input: aiInput, token: signAiInput(aiInput) },
     business: {
       name: place.name,
       address: place.address,
@@ -124,7 +146,7 @@ export async function runAudit(input: AuditInput): Promise<Report> {
           query: ctx.local.query,
           rank: rank >= 0 ? rank + 1 : null,
           top: topCompetitors.slice(0, 3),
-          target: targetCompetitor ?? undefined,
+          target,
           benchmark,
         }
       : null,
@@ -171,4 +193,9 @@ export function scoreTests(tests: TestResult[]) {
     coverage: totalWeight ? measuredWeight / totalWeight : 0,
     categories,
   };
+}
+
+/** Lower-case letters and digits only, for comparing business names. */
+function simplify(s: string) {
+  return s.toLowerCase().replace(/\b(pvt|ltd|private|limited|llp|the)\b/g, "").replace(/[^a-z0-9\u0900-\u097f]+/g, "");
 }

@@ -3,114 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { site } from "@/lib/site";
-
-const AUDIT_PILLARS = [
-  {
-    points: "30 Points",
-    title: "Google Maps & Profile",
-    badge: "Local Presence",
-    desc: "Evaluates how visible and complete your Google Business Profile is when local customers search nearby.",
-    checks: [
-      "Operational status & business verification",
-      "Correct primary & secondary business categories",
-      "Verified address & Google Maps pin accuracy",
-      "Working direct phone number with click-to-call",
-      "Regular operating hours & special holiday hours",
-      "High-resolution photo gallery (10+ image sample)",
-      "Official website link verification on Maps profile",
-    ],
-  },
-  {
-    points: "25 Points",
-    title: "Core Web Vitals & Speed",
-    badge: "Speed & Performance",
-    desc: "Runs official Google PageSpeed mobile diagnostics to test your real user speed on smartphones.",
-    checks: [
-      "Largest Contentful Paint (LCP < 2.5s benchmark)",
-      "Cumulative Layout Shift (CLS visual stability < 0.1)",
-      "First Contentful Paint (FCP initial load speed)",
-      "Total Blocking Time (TBT JavaScript interactivity)",
-      "Mobile responsive viewport & touch-target spacing",
-      "Image optimization & modern next-gen WebP formats",
-      "Script minification & render-blocking resource audit",
-    ],
-  },
-  {
-    points: "25 Points",
-    title: "Technical SEO & Schema",
-    badge: "Search Readiness",
-    desc: "Scans your website HTML code to ensure Google's crawlers can index and rank your pages effortlessly.",
-    checks: [
-      "Title tag length, branding & primary keyword focus",
-      "Meta description presence & click-through rate strength",
-      "H1 heading structure & semantic page hierarchy",
-      "Schema.org LocalBusiness JSON-LD structured data",
-      "Robots.txt crawl access & blocking rule tests",
-      "XML Sitemap detection & indexation accessibility",
-      "Canonical URL integrity & Noindex leak detection",
-      "Broken link crawler (detects internal 404 dead links)",
-    ],
-  },
-  {
-    points: "25 Points",
-    title: "Competitor Rank & Search",
-    badge: "Market Position",
-    desc: "Simulates live customer searches in your city to benchmark your rank against top 20 local competitors.",
-    checks: [
-      "Live search position for '[Category] in [City]'",
-      "Local 3-Pack appearance vs top nearby rivals",
-      "Brand name discovery rank (Position #1 check)",
-      "Market share gap analysis & competitor review comparison",
-    ],
-  },
-  {
-    points: "20 Points",
-    title: "Local SEO & Citations",
-    badge: "Local Authority",
-    desc: "Ensures your business name, address, and phone number (NAP) are identical and trusted across the web.",
-    checks: [
-      "NAP consistency across website and Google profile",
-      "Local city and neighborhood keyword presence",
-      "Embedded Google Maps directions link for walk-ins",
-      "Local business schema structured address validation",
-    ],
-  },
-  {
-    points: "20 Points",
-    title: "Reviews, Reputation & Trust",
-    badge: "Customer Trust",
-    desc: "Measures whether your review profile inspires enough confidence for a customer to call you first.",
-    checks: [
-      "Average star rating benchmark (4.5+ star goal)",
-      "Total review volume compared to market competitors",
-      "Review freshness (reviews received in last 30–90 days)",
-      "Owner response consistency & sentiment health",
-    ],
-  },
-  {
-    points: "15 Points",
-    title: "Social Media Presence",
-    badge: "Brand Verification",
-    desc: "Verifies whether your website connects to active social channels to build brand credibility.",
-    checks: [
-      "Active links to verified social profiles (Instagram, Facebook, YouTube)",
-      "Social preview OpenGraph metadata tags validation",
-      "Cross-platform identity consistency for search engines",
-    ],
-  },
-  {
-    points: "20 Points",
-    title: "Lead Capture & Conversion",
-    badge: "Inbound Inquiries",
-    desc: "Checks if visitors can easily contact, call, message, or visit your business without friction.",
-    checks: [
-      "Click-to-call mobile 'tel:' link functioning",
-      "Direct WhatsApp chat link & instant pre-fill message",
-      "Lead contact form presence & input field readiness",
-      "Clear above-the-fold call-to-action (CTA) buttons",
-    ],
-  },
-];
+import type { Pillar } from "@/lib/audit/catalog";
 
 const SCORING_RULES = [
   {
@@ -137,7 +30,7 @@ const SCORING_RULES = [
 
 const TOOL_FAQS = [
   {
-    q: "Is this 180-point audit truly 100% free?",
+    q: "Is the check really free?",
     a: "Yes, completely free. There is no credit card required, no trial period, and no account creation necessary. You get an instant report on your screen in about 30 seconds.",
   },
   {
@@ -146,7 +39,7 @@ const TOOL_FAQS = [
   },
   {
     q: "How is the data collected?",
-    a: "The tool connects live to the official Google Places API, runs Google's official Lighthouse engine for Core Web Vitals, and parses your website HTML in real-time.",
+    a: "The tool asks Google's Places API for your public business profile, runs Google PageSpeed (Lighthouse) on your website for mobile, and reads your website's public pages. The AI part asks Google's Gemini the questions a customer would ask.",
   },
   {
     q: "Can I check my competitors' score?",
@@ -158,7 +51,7 @@ const TOOL_FAQS = [
   },
 ];
 
-export function ToolDetails() {
+export function ToolDetails({ pillars, total }: { pillars: Pillar[]; total: number }) {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   return (
@@ -170,28 +63,28 @@ export function ToolDetails() {
             <span className="size-2 rounded-full bg-brand animate-pulse" />
             Tool Specifications
           </span>
-          <h2 className="font-display text-[clamp(28px,3.8vw,44px)] font-bold leading-tight text-ink">
-            What does the 180-point audit test?
+          <h2 className="font-display text-[clamp(1.75rem,3.8vw,2.75rem)] font-bold leading-tight text-ink">
+            What does the free check test?
           </h2>
-          <p className="max-w-[680px] text-base leading-relaxed text-gray-600 sm:text-lg">
-            Our audit runs across 8 balanced digital pillars to give you an unbiased, measured evaluation of your entire online footprint.
+          <p className="max-w-[42.5rem] text-base leading-relaxed text-gray-600 sm:text-lg">
+            {total} checks in {pillars.length} areas, plus an AI visibility check. Every result shows what was measured and where the data came from.
           </p>
         </div>
 
         {/* Pillars Grid: Even 2x4 (or 4x2 on large screens) - perfectly balanced */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {AUDIT_PILLARS.map((pillar) => (
+          {pillars.map((pillar) => (
             <div
-              key={pillar.title}
+              key={pillar.id}
               className="flex flex-col justify-between rounded-[28px] border border-gray-200 bg-white p-7 shadow-[0_4px_24px_-6px_rgba(0,0,0,0.04)] transition-all hover:-translate-y-1 hover:border-brand/50 hover:shadow-lg sm:p-8"
             >
               <div>
                 <div className="flex items-center justify-between gap-3 border-b border-gray-100 pb-4">
                   <span className="text-xs font-bold uppercase tracking-wider text-brand-dark">
-                    {pillar.badge}
+                    {pillar.checks.length} {pillar.checks.length === 1 ? "check" : "checks"}
                   </span>
                   <span className="rounded-full bg-ink px-3 py-1 text-xs font-bold text-brand">
-                    {pillar.points}
+                    {pillar.weight}% of score
                   </span>
                 </div>
 
@@ -203,7 +96,7 @@ export function ToolDetails() {
                 </p>
 
                 {/* Sub-check list */}
-                <ul className="mt-5 flex flex-col gap-2 text-[13px] text-gray-700 sm:text-[14px]">
+                <ul className="mt-5 flex flex-col gap-2 text-[0.8125rem] text-gray-700 sm:text-[0.875rem]">
                   {pillar.checks.map((check) => (
                     <li key={check} className="flex items-start gap-2.5">
                       <span className="mt-1 text-brand font-bold">✓</span>
@@ -220,13 +113,13 @@ export function ToolDetails() {
         <div className="flex flex-col justify-between rounded-[28px] border border-line-dark bg-ink p-7 text-white shadow-xl sm:p-8">
           <div>
             <span className="text-xs font-bold uppercase tracking-wider text-brand">
-              Enterprise Infrastructure
+              Where the data comes from
             </span>
             <h3 className="mt-3 font-display text-2xl font-bold sm:text-3xl">
-              Powered by Official Google APIs & Industry-Standard Diagnostics
+              Live public data, read at the moment you run the check
             </h3>
-            <p className="mt-2 max-w-[720px] text-sm text-muted-dark sm:text-base">
-              We don&apos;t use simulated or mock numbers. Every audit makes real-time requests to Google&apos;s Places and PageSpeed servers, providing the exact same diagnostic data used by world-class digital agencies.
+            <p className="mt-2 max-w-[45rem] text-sm text-muted-dark sm:text-base">
+              Every check makes live requests to Google&apos;s Places and PageSpeed services and reads your website&apos;s public pages. If a source does not answer, that check is marked &ldquo;Not tested&rdquo; instead of being guessed.
             </p>
           </div>
 
@@ -236,16 +129,16 @@ export function ToolDetails() {
               <p className="text-xs text-muted-dark">Live Places API v1</p>
             </div>
             <div>
-              <p className="font-display text-lg font-bold text-white">Lighthouse v12</p>
-              <p className="text-xs text-muted-dark">Mobile Web Vitals</p>
+              <p className="font-display text-lg font-bold text-white">PageSpeed</p>
+              <p className="text-xs text-muted-dark">Google Lighthouse, mobile</p>
             </div>
             <div>
-              <p className="font-display text-lg font-bold text-white">Top 20 Radar</p>
-              <p className="text-xs text-muted-dark">Local Competitor Scan</p>
+              <p className="font-display text-lg font-bold text-white">Top 20 search</p>
+              <p className="text-xs text-muted-dark">Local competitor list</p>
             </div>
             <div>
-              <p className="font-display text-lg font-bold text-white">100% Privacy</p>
-              <p className="text-xs text-muted-dark">Zero Stored Credentials</p>
+              <p className="font-display text-lg font-bold text-white">No login</p>
+              <p className="text-xs text-muted-dark">Public data only</p>
             </div>
           </div>
         </div>
@@ -253,15 +146,15 @@ export function ToolDetails() {
 
       {/* 2. How Scoring Works: Even 4-Columns */}
       <div className="rounded-[32px] border border-gray-200 bg-white p-8 shadow-sm sm:p-12">
-        <div className="max-w-[700px]">
+        <div className="max-w-[43.75rem]">
           <span className="text-xs font-bold uppercase tracking-wider text-brand-dark">
-            Transparent Algorithm
+            How scoring works
           </span>
           <h3 className="mt-2 font-display text-2xl font-bold text-ink sm:text-3xl">
             How the 0–100 score is calculated
           </h3>
           <p className="mt-2 text-sm text-gray-600 sm:text-base">
-            Each of the 8 pillars carries a weighted percentage contributing to the overall 100-point total. Points are awarded based on objective measurement:
+            Each area carries the weight shown above. Inside an area, each check counts by its importance:
           </p>
         </div>
 
@@ -285,11 +178,11 @@ export function ToolDetails() {
             Frequently Asked Questions
           </h3>
           <p className="mt-1 text-sm text-gray-600 sm:text-base">
-            Everything you need to know about our free 180-point audit tool.
+            Everything you need to know about the free Visibility Score.
           </p>
         </div>
 
-        <div className="mx-auto flex w-full max-w-[840px] flex-col gap-3">
+        <div className="mx-auto flex w-full max-w-[52.5rem] flex-col gap-3">
           {TOOL_FAQS.map((faq, i) => {
             const isOpen = openFaq === i;
             return (
@@ -307,7 +200,7 @@ export function ToolDetails() {
                   aria-expanded={isOpen}
                   className="flex w-full cursor-pointer items-center justify-between gap-6 px-6 py-5 text-left"
                 >
-                  <span className="font-display text-[17px] font-semibold text-ink sm:text-[18px]">
+                  <span className="font-display text-[1.0625rem] font-semibold text-ink sm:text-[1.125rem]">
                     {faq.q}
                   </span>
                   <span
@@ -329,7 +222,7 @@ export function ToolDetails() {
                   </span>
                 </button>
                 {isOpen && (
-                  <p className="px-6 pb-6 text-[15px] leading-relaxed text-gray-700">
+                  <p className="px-6 pb-6 text-[0.9375rem] leading-relaxed text-gray-700">
                     {faq.a}
                   </p>
                 )}
@@ -339,7 +232,7 @@ export function ToolDetails() {
         </div>
 
         {/* WhatsApp Help Band */}
-        <div className="mx-auto mt-6 flex max-w-[700px] flex-col items-center justify-between gap-4 rounded-3xl bg-ink p-6 text-center text-white sm:flex-row sm:text-left sm:p-8">
+        <div className="mx-auto mt-6 flex max-w-[43.75rem] flex-col items-center justify-between gap-4 rounded-3xl bg-ink p-6 text-center text-white sm:flex-row sm:text-left sm:p-8">
           <div>
             <p className="font-display text-lg font-bold">Need a manual in-depth review?</p>
             <p className="text-xs text-muted-dark sm:text-sm">Talk directly to our SEO and Google Maps specialists on WhatsApp.</p>

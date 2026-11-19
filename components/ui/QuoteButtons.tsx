@@ -49,7 +49,7 @@ function QuoteDialog({ plan, intent, onClose }: { plan: string; intent: Intent; 
       ref={ref}
       onClose={onClose}
       onClick={(e) => e.target === ref.current && ref.current?.close()}
-      className="m-auto w-[min(480px,calc(100vw-32px))] rounded-[28px] p-0 text-[#111111] shadow-[0_40px_100px_-30px_rgba(0,0,0,0.6)] backdrop:bg-ink/60 backdrop:backdrop-blur-sm"
+      className="m-auto w-[min(30rem,calc(100vw-32px))] rounded-[28px] p-0 text-[#111111] shadow-[0_40px_100px_-30px_rgba(0,0,0,0.6)] backdrop:bg-ink/60 backdrop:backdrop-blur-sm"
     >
       <div className="flex flex-col gap-5 p-7">
         <div className="flex items-start justify-between gap-4">
@@ -73,7 +73,7 @@ function QuoteDialog({ plan, intent, onClose }: { plan: string; intent: Intent; 
 
         {state === "sent" ? (
           <div className="flex flex-col gap-4">
-            <p className="text-[17px] text-gray-700">Thank you. We will look at your business and call you with an exact quote soon.</p>
+            <p className="text-[1.0625rem] text-gray-700">Thank you. We will look at your business and call you with an exact quote soon.</p>
             <button type="button" onClick={() => ref.current?.close()} className="self-start rounded-full bg-ink px-6 py-3 font-semibold text-white">
               Done
             </button>
@@ -81,9 +81,10 @@ function QuoteDialog({ plan, intent, onClose }: { plan: string; intent: Intent; 
         ) : (
           <form onSubmit={onSubmit} noValidate className="relative flex flex-col gap-3">
             <Honeypot />
-            <p className="text-[15px] text-gray-600">Share a few details. We check your business first, then send a written quote.</p>
+            <p className="text-[0.9375rem] text-gray-600">Share a few details. We check your business first, then send a written quote.</p>
             <input name="name" placeholder="Your name" autoComplete="name" aria-label="Your name" className={input} />
             <input name="phone" type="tel" placeholder="Phone / WhatsApp" autoComplete="tel" aria-label="Phone or WhatsApp" className={input} />
+            <input name="email" type="email" placeholder="Email (optional)" autoComplete="email" aria-label="Email (optional)" className={input} />
             <div className="grid grid-cols-2 gap-3">
               <input name="business" placeholder="Business name" aria-label="Business name" className={input} />
               <input name="city" placeholder="City" aria-label="City" className={input} />

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CookieSettingsLink } from "@/components/MetaPixel";
 import { Logo } from "@/components/Logo";
 import { SocialLinks } from "@/components/ui/SocialLinks";
 import { services } from "@/lib/content";
@@ -7,7 +8,7 @@ import { CALLBACK_TEXT, site, whatsappLink } from "@/lib/site";
 export function Footer() {
   return (
     <footer className="bg-ink text-white">
-      <div className="mx-auto flex max-w-[1240px] flex-col gap-12 px-6 pb-8 pt-[72px]">
+      <div className="mx-auto flex max-w-[77.5rem] flex-col gap-12 px-6 pb-8 pt-[72px]">
         <div className="flex flex-wrap items-center justify-between gap-6 rounded-[28px] border border-line-dark bg-ink-soft p-8">
           <div className="flex flex-col gap-1.5">
             <p className="font-display text-2xl font-semibold">Want more customers from Google?</p>
@@ -19,9 +20,9 @@ export function Footer() {
         </div>
 
         <div className="flex flex-wrap justify-between gap-10">
-          <div className="flex max-w-[320px] flex-col gap-[18px]">
+          <div className="flex max-w-[20rem] flex-col gap-[18px]">
             <Logo dark size={32} />
-            <p className="text-[15px] leading-relaxed text-muted-dark">
+            <p className="text-[0.9375rem] leading-relaxed text-muted-dark">
               {site.tagline} Branding, websites, apps, Google presence and growth for your business.
             </p>
             <SocialLinks />
@@ -44,10 +45,10 @@ export function Footer() {
               <FooterLink href="/contact">Contact</FooterLink>
             </FooterCol>
             <FooterCol title="Get in touch">
-              <a href={site.whatsapp} className="text-[15px] hover:text-brand">Chat on WhatsApp</a>
-              <a href={whatsappLink(CALLBACK_TEXT)} className="text-[15px] hover:text-brand">Get a call back</a>
-              {site.email && <a href={`mailto:${site.email}`} className="text-[15px] hover:text-brand">{site.email}</a>}
-              {site.hours && <span className="text-[15px] text-muted-dark">Hours: {site.hours}</span>}
+              <a href={site.whatsapp} className="text-[0.9375rem] hover:text-brand">Chat on WhatsApp</a>
+              <a href={whatsappLink(CALLBACK_TEXT)} className="text-[0.9375rem] hover:text-brand">Get a call back</a>
+              {site.email && <a href={`mailto:${site.email}`} className="text-[0.9375rem] hover:text-brand">{site.email}</a>}
+              {site.hours && <span className="text-[0.9375rem] text-muted-dark">Hours: {site.hours}</span>}
             </FooterCol>
           </div>
         </div>
@@ -57,6 +58,7 @@ export function Footer() {
           <div className="flex flex-wrap gap-6">
             <Link href="/privacy" className="hover:text-white">Privacy policy</Link>
             <Link href="/terms" className="hover:text-white">Terms of service</Link>
+            <CookieSettingsLink className="hover:text-white" />
           </div>
         </div>
       </div>
@@ -66,7 +68,7 @@ export function Footer() {
 
 function FooterCol({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="flex min-w-[160px] flex-col gap-3">
+    <div className="flex min-w-[10rem] flex-col gap-3">
       <p className="text-sm font-semibold text-muted-dark">{title}</p>
       {children}
     </div>
@@ -75,7 +77,7 @@ function FooterCol({ title, children }: { title: string; children: React.ReactNo
 
 function FooterLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <Link href={href} className="text-[15px] transition-colors hover:text-brand">
+    <Link href={href} className="text-[0.9375rem] transition-colors hover:text-brand">
       {children}
     </Link>
   );

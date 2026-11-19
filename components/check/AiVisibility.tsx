@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import type { AiInput, AiReport, AnswerResult, BotResult, Suggestion } from "@/lib/ai/types";
 
-type State = { kind: "loading" } | { kind: "error"; message: string } | { kind: "done"; report: AiReport };
+type State = { kind: "loading" } | { kind: "error"; message: string; retry: boolean } | { kind: "done"; report: AiReport };
 
 const PRIORITY: Record<Suggestion["priority"], string> = {
   high: "bg-red-100 text-red-700",
@@ -13,23 +13,31 @@ const PRIORITY: Record<Suggestion["priority"], string> = {
 
 const PURPOSE: Record<BotResult["purpose"], string> = { search: "AI search", user: "User link", training: "AI training" };
 
-export function AiVisibility({ input }: { input: AiInput }) {
+export function AiVisibility({ input, token }: { input: AiInput; token: string }) {
   const [state, setState] = useState<State>({ kind: "loading" });
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     const ctrl = new AbortController();
-    fetch("/api/check/ai", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(input), signal: ctrl.signal })
+    setState({ kind: "loading" });
+    fetch("/api/check/ai", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...input, token }), signal: ctrl.signal })
       .then(async (res) => {
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error ?? "The AI check could not finish.");
+        if (!res.ok) throw Object.assign(new Error(data.error ?? "The AI check could not finish."), { status: res.status });
         setState({ kind: "done", report: data as AiReport });
       })
       .catch((e: Error) => {
-        if (e.name !== "AbortError") setState({ kind: "error", message: e.message });
+        if (e.name === "AbortError") return;
+        const status = (e as Error & { status?: number }).status;
+        setState({
+          kind: "error",
+          message: e instanceof TypeError ? "No internet connection. Please try again." : e.message,
+          retry: status !== 429 && status !== 403,
+        });
       });
     return () => ctrl.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input.name, input.city, input.category, input.website]);
+  }, [input.name, input.city, input.category, input.website, attempt]);
 
   return (
     <section className="flex flex-col gap-6">
@@ -47,7 +55,16 @@ export function AiVisibility({ input }: { input: AiInput }) {
           Asking AI about {input.category} in {input.city}… this takes about 20 seconds.
         </div>
       )}
-      {state.kind === "error" && <p className="rounded-[20px] bg-mist p-6 text-gray-700">{state.message}</p>}
+      {state.kind === "error" && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[20px] bg-mist p-6 text-gray-700" role="alert">
+          <p>{state.message}</p>
+          {state.retry && (
+            <button type="button" onClick={() => setAttempt((n) => n + 1)} className="rounded-full border border-[#111111] px-5 py-2.5 text-sm font-semibold hover:bg-[#111111] hover:text-white">
+              Try again
+            </button>
+          )}
+        </div>
+      )}
       {state.kind === "done" && <Body report={state.report} input={input} />}
     </section>
   );
@@ -95,7 +112,7 @@ function Body({ report, input }: { report: AiReport; input: AiInput }) {
               <h4 className="font-semibold">Who AI recommends instead</h4>
               <ol className="flex flex-col gap-2">
                 {report.competitors.map((c) => (
-                  <li key={c.name} className="flex items-baseline justify-between gap-3 text-[15px]">
+                  <li key={c.name} className="flex items-baseline justify-between gap-3 text-[0.9375rem]">
                     <span>{c.name}</span>
                     <span className="whitespace-nowrap text-sm text-gray-500">
                       #{c.bestPosition}
@@ -111,7 +128,7 @@ function Body({ report, input }: { report: AiReport; input: AiInput }) {
               <h4 className="font-semibold">Websites AI used as proof</h4>
               <ul className="flex flex-col gap-2">
                 {report.sources.map((s) => (
-                  <li key={s.domain} className="flex items-baseline justify-between gap-3 text-[15px]">
+                  <li key={s.domain} className="flex items-baseline justify-between gap-3 text-[0.9375rem]">
                     <span className={s.own ? "font-semibold text-brand-dark" : ""}>
                       {s.domain}
                       {s.own ? " (your site)" : ""}
@@ -155,7 +172,7 @@ function Body({ report, input }: { report: AiReport; input: AiInput }) {
                   <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold capitalize ${PRIORITY[s.priority]}`}>{s.priority}</span>
                   {s.title}
                 </span>
-                <span className="text-[15px] text-gray-600">{s.detail}</span>
+                <span className="text-[0.9375rem] text-gray-600">{s.detail}</span>
               </li>
             ))}
           </ol>
@@ -191,7 +208,7 @@ function AnswerCard({ a }: { a: AnswerResult }) {
         <span className={`self-start whitespace-nowrap rounded-full px-3 py-1 text-xs font-bold sm:self-auto ${badge.cls}`}>{badge.text}</span>
       </summary>
       <div className="flex flex-col gap-3 border-t border-gray-100 p-5">
-        <p className="whitespace-pre-line break-words text-[15px] text-gray-700">{a.text.replace(/\*\*/g, "")}</p>
+        <p className="whitespace-pre-line break-words text-[0.9375rem] text-gray-700">{a.text.replace(/\*\*/g, "")}</p>
         {a.sources.length > 0 && (
           <p className="text-sm text-gray-500">
             <span className="font-semibold text-gray-700">Sources: </span>
@@ -262,11 +279,17 @@ function LlmsBox({ llms, name }: { llms: AiReport["llms"]; name: string }) {
             ? `Your site has ${llms.url}. Here is the start of it.`
             : `A plain-text summary of ${name} for AI tools. Fill in the <placeholders>, then upload it to your site as /llms.txt.`}
         </p>
-        <pre className="max-h-80 overflow-auto whitespace-pre-wrap break-words rounded-2xl bg-mist p-4 text-[13px] leading-relaxed text-gray-800">{content}</pre>
+        <pre className="max-h-80 overflow-auto whitespace-pre-wrap break-words rounded-2xl bg-mist p-4 text-[0.8125rem] leading-relaxed text-gray-800">{content}</pre>
         {!llms.found && (
           <div className="flex flex-wrap gap-3">
             <button
-              onClick={() => navigator.clipboard.writeText(llms.draft).then(() => setCopied(true))}
+              type="button"
+              onClick={() =>
+                navigator.clipboard
+                  ?.writeText(llms.draft)
+                  .then(() => setCopied(true))
+                  .catch(() => alert("Copy did not work in this browser. Please use Download instead."))
+              }
               className="rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-ink"
             >
               {copied ? "Copied" : "Copy"}

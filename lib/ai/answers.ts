@@ -46,7 +46,9 @@ export function listItems(text: string): string[] {
   return items;
 }
 
-const UNKNOWN = /(couldn'?t|could not|unable to|can'?t|cannot) (find|locate|verify)|(don'?t|do not) have (specific |any |enough )?(information|details|data)|no (specific |reliable |verified )?(information|details|reviews|results)|not (able to )?find/i;
+/** The AI saying it does not know the business. Anchored to first-person / "no information" phrasing so praise like "you will not find a better clinic" does not match. */
+const UNKNOWN =
+  /\b(i|we)\s+(couldn'?t|could not|was unable to|am unable to|wasn'?t able to|can'?t|cannot)\s+(find|locate|verify)\b|\b(i|we)\s+(don'?t|do not)\s+have\s+(any |specific |enough |much |detailed )?(information|details|data)\b|\b(there is|there's|i found)\s+(no|limited|little)\s+(specific |reliable |verified |public )?(information|details|data)\b|\bno (specific |reliable |verified |public )?(information|details|data) (is |was )?(available|found)\b/i;
 
 export function analyzeAnswer(text: string, name: string, kind: "discovery" | "brand") {
   const items = listItems(text);

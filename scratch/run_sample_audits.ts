@@ -47,7 +47,7 @@ async function runSample(name: string, city: string, category: string, competito
 
   // Pick the top matched place
   const chosen = places[0];
-  console.log(`\nStep 2: Selected "${chosen.name}" for full 180-Point Audit...`);
+  console.log(`\nStep 2: Selected "${chosen.name}" for the full audit...`);
 
   // Step 2: Run audit
   const report = await runAudit({
@@ -73,7 +73,7 @@ async function runSample(name: string, city: string, category: string, competito
     const bm = report.competitors.benchmark;
     console.log(`\n⚔️ HEAD-TO-HEAD COMPETITOR COMPARISON:`);
     console.log(`  - Your Google Maps Rank : #${report.competitors.rank ?? "20+"}`);
-    console.log(`  - Rival: ${bm.competitor.name} (Rank #1)`);
+    console.log(`  - Rival: ${bm.competitor.name} (${bm.competitor.rank ? `position ${bm.competitor.rank}` : "not in local top 20"}${bm.chosen ? ", named by user" : ""})`);
     console.log(`  - Rating Comparison    : You: ${report.business.rating ?? "N/A"}★ vs Rival: ${bm.competitor.rating ?? "N/A"}★`);
     console.log(`  - Review Volume Gap    : You: ${report.business.reviews ?? 0} vs Rival: ${bm.competitor.reviews ?? 0} (Diff: ${bm.reviewsDiff > 0 ? "+" + bm.reviewsDiff + " needed" : "Ahead"})`);
     console.log(`  - Key Gaps Identified:`);

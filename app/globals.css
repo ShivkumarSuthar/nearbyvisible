@@ -16,13 +16,50 @@
   --font-display: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
 }
 
+/*
+ * Fluid root size. All text and spacing are in rem, so the whole site scales together.
+ * 16px up to ~1600px wide (phones and laptops unchanged), then grows to 20px on 2K/4K screens.
+ * Percent-based, so a visitor's own browser font setting is still respected.
+ */
 html {
+  font-size: clamp(100%, 0.25rem + 0.75vw, 125%);
   scroll-behavior: smooth;
-  scroll-padding-top: 80px;
+  scroll-padding-top: 5rem;
 }
 
 body {
   @apply bg-white font-sans text-[#111111] antialiased;
+}
+
+/*
+ * Cursors. Tailwind v4 resets buttons to the plain arrow, so every clickable thing gets the hand here,
+ * in the base layer so a utility class (e.g. cursor-not-allowed) can still override it.
+ */
+@layer base {
+  button,
+  [role="button"],
+  [role="option"],
+  [role="tab"],
+  summary,
+  select,
+  label:has(> input[type="checkbox"]),
+  label:has(> input[type="radio"]),
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="submit"],
+  input[type="button"],
+  input[type="reset"],
+  input[type="file"],
+  input[type="range"],
+  input[type="color"] {
+    cursor: pointer;
+  }
+
+  :disabled,
+  [aria-disabled="true"],
+  label:has(> :disabled) {
+    cursor: not-allowed;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -37,10 +74,10 @@ body {
 }
 
 /* Blog article typography */
-.prose-nv { color: #2b2f2c; font-size: 18px; line-height: 1.8; }
+.prose-nv { color: #2b2f2c; font-size: 1.125rem; line-height: 1.8; }
 .prose-nv > * + * { margin-top: 1.25em; }
-.prose-nv h2 { font-family: var(--font-display); font-weight: 700; font-size: 30px; line-height: 1.2; letter-spacing: -0.5px; color: #111; margin-top: 2.2em; scroll-margin-top: 110px; }
-.prose-nv h3 { font-family: var(--font-display); font-weight: 600; font-size: 22px; line-height: 1.3; color: #111; margin-top: 1.8em; }
+.prose-nv h2 { font-family: var(--font-display); font-weight: 700; font-size: 1.875rem; line-height: 1.2; letter-spacing: -0.5px; color: #111; margin-top: 2.2em; scroll-margin-top: 110px; }
+.prose-nv h3 { font-family: var(--font-display); font-weight: 600; font-size: 1.375rem; line-height: 1.3; color: #111; margin-top: 1.8em; }
 .prose-nv a { color: var(--color-brand-dark); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
 .prose-nv strong { color: #111; }
 .prose-nv ul, .prose-nv ol { padding-left: 1.4em; }
@@ -52,6 +89,20 @@ body {
 .prose-nv blockquote p { margin: 0; }
 .prose-nv hr { border: 0; border-top: 1px solid #e5e7eb; margin: 2.5em 0; }
 .prose-nv code { background: var(--color-mist); padding: 2px 6px; border-radius: 6px; font-size: 0.9em; }
-.prose-nv table { width: 100%; border-collapse: collapse; font-size: 16px; }
+.prose-nv table { width: 100%; border-collapse: collapse; font-size: 1rem; }
 .prose-nv th, .prose-nv td { border-bottom: 1px solid #e5e7eb; padding: 10px 12px 10px 0; text-align: left; }
 .prose-nv th { color: #111; }
+
+/* Hero: "nearby" radius rings ripple out from the pin, like a map's search radius. */
+@keyframes nv-ripple {
+  from { transform: scale(0.35); opacity: 0.55; }
+  to { transform: scale(1); opacity: 0; }
+}
+.nv-ripple {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: nv-ripple 6s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .nv-ripple { animation: none; opacity: 0; }
+}

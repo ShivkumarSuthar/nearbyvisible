@@ -22,7 +22,7 @@ export default function ServicesPage() {
         text="Six services, in the order a business needs them. We review each one with you, and you choose only what helps."
         cta
       />
-      <section className="mx-auto max-w-[1240px] px-6 py-28">
+      <section className="mx-auto max-w-[77.5rem] px-6 py-28">
         <ol className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {services.map((s, i) => (
             <li key={s.slug}>
@@ -34,7 +34,7 @@ export default function ServicesPage() {
         </ol>
       </section>
       <section className="bg-mist">
-        <div className="mx-auto flex max-w-[1240px] flex-col gap-12 px-6 py-28">
+        <div className="mx-auto flex max-w-[77.5rem] flex-col gap-12 px-6 py-28">
           <SectionHeading
             eyebrow="How we work"
             title="Honest advice first. Then we build."

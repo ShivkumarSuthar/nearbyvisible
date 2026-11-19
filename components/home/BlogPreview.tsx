@@ -8,11 +8,11 @@ export function BlogPreview() {
   if (!posts.length) return null;
   return (
     <section className="bg-mist">
-      <div className="mx-auto flex max-w-[1240px] flex-col gap-12 px-6 py-28">
+      <div className="mx-auto flex max-w-[77.5rem] flex-col gap-12 px-6 py-28">
         <Reveal className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <div className="flex flex-col gap-4">
-            <p className="text-[15px] font-semibold tracking-wide text-brand-dark">From the blog</p>
-            <h2 className="max-w-[640px] font-display text-[clamp(32px,3.6vw,46px)] font-bold leading-[1.08] tracking-[-1.2px]">
+            <p className="text-[0.9375rem] font-semibold tracking-wide text-brand-dark">From the blog</p>
+            <h2 className="max-w-[40rem] font-display text-[clamp(2rem,3.6vw,2.875rem)] font-bold leading-[1.08] tracking-[-1.2px]">
               Free guides to <span className="text-gray-400">get found online.</span>
             </h2>
           </div>

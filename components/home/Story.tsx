@@ -11,10 +11,10 @@ const competitors = [
 export function Story() {
   return (
     <div id="story">
-      <section className="mx-auto flex max-w-[1240px] flex-col gap-5 px-6 pb-4 pt-32">
+      <section className="mx-auto flex max-w-[77.5rem] flex-col gap-5 px-6 pb-4 pt-32">
         <Reveal className="flex flex-col gap-5">
-          <p className="text-[15px] font-semibold tracking-wide text-brand-dark">A story we see every week</p>
-          <h2 className="max-w-[860px] font-display text-[clamp(36px,4.4vw,56px)] font-bold leading-[1.1] tracking-[-1px]">
+          <p className="text-[0.9375rem] font-semibold tracking-wide text-brand-dark">A story we see every week</p>
+          <h2 className="max-w-[53.75rem] font-display text-[clamp(2.25rem,4.4vw,3.5rem)] font-bold leading-[1.1] tracking-[-1px]">
             Meet Ramesh. He is not a real person. <span className="text-brand-dark">His problem is.</span>
           </h2>
         </Reveal>
@@ -75,14 +75,14 @@ export function Story() {
 
 function ProfileCard() {
   return (
-    <div className="flex w-full max-w-[420px] flex-col gap-5 rounded-[28px] border border-gray-200 bg-white p-8 shadow-[0_24px_48px_-24px_rgba(17,17,17,0.18)]">
+    <div className="flex w-full max-w-[26.25rem] flex-col gap-5 rounded-[28px] border border-gray-200 bg-white p-8 shadow-[0_24px_48px_-24px_rgba(17,17,17,0.18)]">
       <div className="flex items-center gap-4">
         <span className="flex size-16 items-center justify-center rounded-full bg-gray-100 font-display text-2xl font-semibold text-gray-700">
           R
         </span>
         <div className="flex flex-col gap-1">
-          <span className="text-[19px] font-semibold">Ramesh Plumbing</span>
-          <span className="text-[15px] text-gray-600">Happy customers: many</span>
+          <span className="text-[1.1875rem] font-semibold">Ramesh Plumbing</span>
+          <span className="text-[0.9375rem] text-gray-600">Happy customers: many</span>
         </div>
       </div>
       <ul className="flex flex-col gap-2.5 border-t border-gray-200 pt-[18px] text-base text-gray-700">

@@ -30,10 +30,11 @@ export function ContactForm() {
         <Field id="name" label="Your name" required />
         <Field id="business" label="Business name" />
         <Field id="phone" label="Phone or WhatsApp" type="tel" required />
+        <Field id="email" label="Email (optional)" type="email" />
         <Field id="city" label="City / area" />
       </div>
       <div className="flex flex-col gap-2">
-        <label htmlFor="service" className="text-[15px] font-semibold">What do you need?</label>
+        <label htmlFor="service" className="text-[0.9375rem] font-semibold">What do you need?</label>
         <select id="service" name="service" className={field} defaultValue="Not sure yet, review my business">
           <option>Not sure yet, review my business</option>
           {services.map((s) => (
@@ -42,14 +43,14 @@ export function ContactForm() {
         </select>
       </div>
       <div className="flex flex-col gap-2">
-        <label htmlFor="message" className="text-[15px] font-semibold">Message</label>
+        <label htmlFor="message" className="text-[0.9375rem] font-semibold">Message</label>
         <textarea id="message" name="message" rows={4} className={`${field} resize-y`} />
       </div>
-      {error && <p role="alert" className="text-[15px] font-medium text-red-700">{error}</p>}
+      {error && <p role="alert" className="text-[0.9375rem] font-medium text-red-700">{error}</p>}
       <button
         type="submit"
         disabled={state === "sending"}
-        className="self-start rounded-full bg-ink px-7 py-4 text-[17px] font-semibold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-60"
+        className="self-start rounded-full bg-ink px-7 py-4 text-[1.0625rem] font-semibold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-60"
       >
         {state === "sending" ? "Sending…" : "Send message"}
       </button>
@@ -60,11 +61,11 @@ export function ContactForm() {
 function Field({ id, label, type = "text", required }: { id: string; label: string; type?: string; required?: boolean }) {
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor={id} className="text-[15px] font-semibold">
+      <label htmlFor={id} className="text-[0.9375rem] font-semibold">
         {label}
         {required && <span className="text-red-700"> *</span>}
       </label>
-      <input id={id} name={id} type={type} required={required} className={field} autoComplete={type === "tel" ? "tel" : id === "name" ? "name" : "off"} />
+      <input id={id} name={id} type={type} required={required} className={field} autoComplete={type === "tel" ? "tel" : type === "email" ? "email" : id === "name" ? "name" : "off"} />
     </div>
   );
 }

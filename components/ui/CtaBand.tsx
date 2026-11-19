@@ -9,14 +9,14 @@ export function CtaBand({
 }: Props) {
   return (
     <section className="px-6 py-24">
-      <Reveal className="mx-auto flex max-w-[1240px] flex-col items-center gap-5 rounded-[40px] bg-brand-wash px-8 py-[72px] text-center">
-        <h2 className="max-w-[760px] font-display text-[clamp(30px,4vw,48px)] font-bold leading-[1.1] tracking-[-1px]">{title}</h2>
-        <p className="max-w-[560px] text-[19px] leading-relaxed text-gray-700">{text}</p>
+      <Reveal className="mx-auto flex max-w-[77.5rem] flex-col items-center gap-5 rounded-[40px] bg-brand-wash px-8 py-[72px] text-center">
+        <h2 className="max-w-[47.5rem] font-display text-[clamp(1.875rem,4vw,3rem)] font-bold leading-[1.1] tracking-[-1px]">{title}</h2>
+        <p className="max-w-[35rem] text-[1.1875rem] leading-relaxed text-gray-700">{text}</p>
         <div className="mt-2 flex flex-wrap justify-center gap-4">
-          <a href={site.whatsapp} className="rounded-full bg-brand px-7 py-4 text-[17px] font-semibold text-ink transition-transform hover:-translate-y-0.5">
+          <a href={site.whatsapp} className="rounded-full bg-brand px-7 py-4 text-[1.0625rem] font-semibold text-ink transition-transform hover:-translate-y-0.5">
             Chat on WhatsApp
           </a>
-          <a href={whatsappLink(CALLBACK_TEXT)} className="rounded-full border border-[#111111] px-7 py-4 text-[17px] font-semibold transition-colors hover:bg-[#111111] hover:text-white">
+          <a href={whatsappLink(CALLBACK_TEXT)} className="rounded-full border border-[#111111] px-7 py-4 text-[1.0625rem] font-semibold transition-colors hover:bg-[#111111] hover:text-white">
             Get a call back
           </a>
         </div>

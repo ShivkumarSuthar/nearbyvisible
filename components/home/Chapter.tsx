@@ -17,7 +17,7 @@ export function Chapter({ number, title, children, visual, tone = "light", visua
     <section className={clsx(tone === "mist" && "bg-mist", dark && "bg-ink text-white")}>
       <div
         className={clsx(
-          "mx-auto flex max-w-[1240px] flex-col items-center gap-16 px-6 py-24 md:gap-[72px] md:py-28 lg:flex-row",
+          "mx-auto flex max-w-[77.5rem] flex-col items-center gap-16 px-6 py-24 md:gap-[72px] md:py-28 lg:flex-row",
           visualFirst && "lg:flex-row-reverse",
         )}
       >
@@ -25,8 +25,8 @@ export function Chapter({ number, title, children, visual, tone = "light", visua
           <span className={clsx("font-display text-8xl font-bold leading-none", dark ? "text-[#1e3a26]" : "text-brand-tint")}>
             {number}
           </span>
-          <h3 className="font-display text-[clamp(30px,3.4vw,40px)] font-bold leading-[1.15]">{title}</h3>
-          <div className={clsx("flex flex-col gap-4 text-[19px] leading-[1.75]", dark ? "text-muted-dark" : "text-gray-700")}>
+          <h3 className="font-display text-[clamp(1.875rem,3.4vw,2.5rem)] font-bold leading-[1.15]">{title}</h3>
+          <div className={clsx("flex flex-col gap-4 text-[1.1875rem] leading-[1.75]", dark ? "text-muted-dark" : "text-gray-700")}>
             {children}
           </div>
         </Reveal>

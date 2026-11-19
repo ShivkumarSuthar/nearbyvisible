@@ -30,27 +30,25 @@ const thread = [
 
 export function WhoWeHelp() {
   const reduce = useReducedMotion();
-  const appear = (delay: number) =>
-    reduce
-      ? {}
-      : {
-          initial: { opacity: 0, y: 16, scale: 0.98 },
-          whileInView: { opacity: 1, y: 0, scale: 1 },
-          viewport: { once: true, margin: "-12% 0px" },
-          transition: { duration: 0.45, delay, ease: [0.22, 1, 0.36, 1] as const },
-        };
+  // Same starting style on server and client; reduced motion just makes the transition instant.
+  const appear = (delay: number) => ({
+    initial: { opacity: 0, y: 16, scale: 0.98 },
+    whileInView: { opacity: 1, y: 0, scale: 1 },
+    viewport: { once: true, margin: "-12% 0px" },
+    transition: reduce ? { duration: 0 } : { duration: 0.45, delay, ease: [0.22, 1, 0.36, 1] as const },
+  });
 
   return (
     <section className="bg-mist">
-      <div className="mx-auto grid max-w-[1240px] grid-cols-1 gap-14 px-6 py-32 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-20">
+      <div className="mx-auto grid max-w-[77.5rem] grid-cols-1 gap-14 px-6 py-32 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-20">
         {/* Left: the message */}
         <div className="flex flex-col gap-6 lg:sticky lg:top-28 lg:self-start">
-          <p className="text-[15px] font-semibold tracking-wide text-brand-dark">Who we help</p>
-          <h2 className="font-display text-[clamp(32px,3.6vw,46px)] font-bold leading-[1.08] tracking-[-1.2px]">
+          <p className="text-[0.9375rem] font-semibold tracking-wide text-brand-dark">Who we help</p>
+          <h2 className="font-display text-[clamp(2rem,3.6vw,2.875rem)] font-bold leading-[1.08] tracking-[-1.2px]">
             Sound familiar?
             <span className="block text-gray-400">We hear it daily.</span>
           </h2>
-          <p className="max-w-[440px] text-[19px] leading-relaxed text-gray-600">
+          <p className="max-w-[27.5rem] text-[1.1875rem] leading-relaxed text-gray-600">
             We work with business owners who do great work but lose customers online. If any of these messages could be
             yours, we can help.
           </p>
@@ -75,7 +73,7 @@ export function WhoWeHelp() {
           <div className="flex items-center gap-3 border-b border-gray-100 px-6 py-4">
             <span className="flex size-10 items-center justify-center rounded-full bg-ink font-display text-sm font-bold text-brand">NV</span>
             <div className="flex flex-col">
-              <span className="text-[15px] font-semibold">NearbyVisible</span>
+              <span className="text-[0.9375rem] font-semibold">NearbyVisible</span>
               <span className="flex items-center gap-1.5 text-xs text-gray-500">
                 <span className="size-1.5 rounded-full bg-brand" /> On WhatsApp
               </span>
@@ -86,12 +84,12 @@ export function WhoWeHelp() {
             {thread.map((m) => (
               <li key={m.pain} className="flex flex-col gap-3">
                 <motion.div {...appear(0)} className="max-w-[82%] self-start">
-                  <p className="rounded-[20px] rounded-bl-md bg-white px-4 py-3 text-[16px] leading-snug text-[#111111] shadow-[0_1px_2px_rgba(17,17,17,0.08)]">
+                  <p className="rounded-[20px] rounded-bl-md bg-white px-4 py-3 text-[1rem] leading-snug text-[#111111] shadow-[0_1px_2px_rgba(17,17,17,0.08)]">
                     {m.pain}
                   </p>
                 </motion.div>
                 <motion.div {...appear(0.25)} className="mb-3 max-w-[82%] self-end">
-                  <div className="rounded-[20px] rounded-br-md bg-brand-tint px-4 py-3 text-[16px] leading-snug text-[#0f2e1a] shadow-[0_1px_2px_rgba(17,17,17,0.08)]">
+                  <div className="rounded-[20px] rounded-br-md bg-brand-tint px-4 py-3 text-[1rem] leading-snug text-[#0f2e1a] shadow-[0_1px_2px_rgba(17,17,17,0.08)]">
                     <p>{m.reply}</p>
                     <div className="mt-2 flex items-center justify-between gap-4">
                       <Link
@@ -100,20 +98,20 @@ export function WhoWeHelp() {
                       >
                         {m.service.label} →
                       </Link>
-                      <span aria-hidden className="text-[11px] text-brand-dark/60">✓✓</span>
+                      <span aria-hidden className="text-[0.6875rem] text-brand-dark/60">✓✓</span>
                     </div>
                   </div>
                 </motion.div>
               </li>
             ))}
             <li className="flex flex-col gap-3">
-              <motion.p {...appear(0)} className="max-w-[82%] self-start rounded-[20px] rounded-bl-md bg-white px-4 py-3 text-[16px] font-medium leading-snug shadow-[0_1px_2px_rgba(17,17,17,0.08)]">
+              <motion.p {...appear(0)} className="max-w-[82%] self-start rounded-[20px] rounded-bl-md bg-white px-4 py-3 text-[1rem] font-medium leading-snug shadow-[0_1px_2px_rgba(17,17,17,0.08)]">
                 So where do we start?
               </motion.p>
               <motion.div {...appear(0.25)} className="self-end">
                 <Link
                   href="/check"
-                  className="flex items-center gap-2 rounded-[20px] rounded-br-md bg-brand px-5 py-3.5 text-[16px] font-semibold text-ink shadow-[0_8px_20px_-8px_rgba(34,197,94,0.6)] transition-transform hover:-translate-y-0.5"
+                  className="flex items-center gap-2 rounded-[20px] rounded-br-md bg-brand px-5 py-3.5 text-[1rem] font-semibold text-ink shadow-[0_8px_20px_-8px_rgba(34,197,94,0.6)] transition-transform hover:-translate-y-0.5"
                 >
                   With your free Visibility Score →
                 </Link>

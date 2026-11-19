@@ -21,7 +21,7 @@ export function FaqExplorer() {
   const tabs = [{ id: "all", title: "All" }, ...faqGroups.map(({ id, title }) => ({ id, title }))];
 
   return (
-    <div className="grid grid-cols-1 gap-10 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-16">
+    <div className="grid grid-cols-1 gap-10 lg:grid-cols-[16.25rem_minmax(0,1fr)] lg:gap-16">
       <aside className="flex flex-col gap-6 lg:sticky lg:top-28 lg:self-start">
         <label className="relative block">
           <span className="sr-only">Search questions</span>
@@ -44,7 +44,7 @@ export function FaqExplorer() {
               type="button"
               onClick={() => setTopic(t.id)}
               aria-pressed={topic === t.id}
-              className={`whitespace-nowrap rounded-full px-4 py-2.5 text-left text-[15px] font-semibold transition-colors lg:rounded-xl ${
+              className={`whitespace-nowrap rounded-full px-4 py-2.5 text-left text-[0.9375rem] font-semibold transition-colors lg:rounded-xl ${
                 topic === t.id ? "bg-ink text-white" : "bg-mist text-gray-700 hover:bg-gray-200 lg:bg-transparent"
               }`}
             >
@@ -54,8 +54,8 @@ export function FaqExplorer() {
         </nav>
         <div className="hidden flex-col gap-3 rounded-[22px] bg-ink p-6 text-white lg:flex">
           <p className="font-display text-lg font-semibold">Can’t find your answer?</p>
-          <p className="text-[15px] text-muted-dark">Ask on WhatsApp. A real person replies.</p>
-          <a href={site.whatsapp} className="self-start rounded-full bg-brand px-5 py-2.5 text-[15px] font-semibold text-ink">
+          <p className="text-[0.9375rem] text-muted-dark">Ask on WhatsApp. A real person replies.</p>
+          <a href={site.whatsapp} className="self-start rounded-full bg-brand px-5 py-2.5 text-[0.9375rem] font-semibold text-ink">
             Ask us
           </a>
         </div>
@@ -65,7 +65,7 @@ export function FaqExplorer() {
         {groups.length ? (
           groups.map((g) => (
             <section key={g.id} className="flex flex-col gap-5">
-              <h2 className="font-display text-[26px] font-bold tracking-[-0.5px]">{g.title}</h2>
+              <h2 className="font-display text-[1.625rem] font-bold tracking-[-0.5px]">{g.title}</h2>
               <FaqList items={g.items} />
             </section>
           ))

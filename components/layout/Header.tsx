@@ -68,12 +68,12 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-line-dark bg-ink">
-      <nav ref={navRef} aria-label="Main" className="mx-auto flex max-w-[1240px] items-center justify-between gap-8 px-6 py-3.5">
+      <nav ref={navRef} aria-label="Main" className="mx-auto flex max-w-[77.5rem] items-center justify-between gap-8 px-6 py-3.5">
         <Link href="/" aria-label={`${site.name} home`} className="flex-none">
           <Logo dark />
         </Link>
 
-        <div className="hidden items-center gap-8 text-[15px] font-medium lg:flex">
+        <div className="hidden items-center gap-8 text-[0.9375rem] font-medium lg:flex">
           <Link href="/" className={tab(group === "home")}>Home</Link>
 
           <div className="relative">
@@ -87,7 +87,7 @@ export function Header() {
               Services <Chevron open={menu === "services"} />
             </button>
             {menu === "services" && (
-              <div id="menu-services" className="absolute left-1/2 top-[calc(100%+12px)] z-30 flex w-[560px] -translate-x-1/2 flex-col gap-3 rounded-[20px] bg-mist p-4 shadow-[0_24px_48px_-16px_rgba(0,0,0,0.35)]">
+              <div id="menu-services" className="absolute left-1/2 top-[calc(100%+12px)] z-30 flex w-[35rem] -translate-x-1/2 flex-col gap-3 rounded-[20px] bg-mist p-4 shadow-[0_24px_48px_-16px_rgba(0,0,0,0.35)]">
                 <div className="grid grid-cols-2 gap-2">
                   {services.map((s) => (
                     <MenuItem key={s.slug} href={`/services/${s.slug}`} label={s.name} text={s.menu} />
@@ -111,7 +111,7 @@ export function Header() {
               Company <Chevron open={menu === "company"} />
             </button>
             {menu === "company" && (
-              <div id="menu-company" className="absolute left-1/2 top-[calc(100%+12px)] z-30 flex w-[280px] -translate-x-1/2 flex-col gap-2 rounded-[20px] bg-mist p-3 shadow-[0_24px_48px_-16px_rgba(0,0,0,0.35)]">
+              <div id="menu-company" className="absolute left-1/2 top-[calc(100%+12px)] z-30 flex w-[17.5rem] -translate-x-1/2 flex-col gap-2 rounded-[20px] bg-mist p-3 shadow-[0_24px_48px_-16px_rgba(0,0,0,0.35)]">
                 {company.map((c) => (
                   <MenuItem key={c.href} href={c.href} label={c.label} text={c.text} />
                 ))}
@@ -124,14 +124,14 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Link href="/check" className="hidden items-center gap-2 whitespace-nowrap rounded-full border border-edge-dark px-5 py-3 text-[15px] font-semibold text-white transition-colors hover:border-brand hover:text-brand md:inline-flex">
+          <Link href="/check" className="hidden items-center gap-2 whitespace-nowrap rounded-full border border-edge-dark px-5 py-3 text-[0.9375rem] font-semibold text-white transition-colors hover:border-brand hover:text-brand md:inline-flex">
             <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" aria-hidden="true">
               <circle cx="11" cy="11" r="6" />
               <path d="m20 20-4.5-4.5" />
             </svg>
             Get your free score
           </Link>
-          <a href={site.whatsapp} className="hidden items-center gap-2 whitespace-nowrap rounded-full bg-brand px-5 py-3 text-[15px] font-semibold text-ink transition-transform hover:-translate-y-0.5 sm:inline-flex">
+          <a href={site.whatsapp} className="hidden items-center gap-2 whitespace-nowrap rounded-full bg-brand px-5 py-3 text-[0.9375rem] font-semibold text-ink transition-transform hover:-translate-y-0.5 sm:inline-flex">
             <svg viewBox="0 0 24 24" className="size-4" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.4Z"/></svg>
             Chat on WhatsApp
           </a>
@@ -187,8 +187,8 @@ function Chevron({ open }: { open: boolean }) {
 function MenuItem({ href, label, text }: { href: string; label: string; text: string }) {
   return (
     <Link href={href} className="flex flex-col gap-1 rounded-[14px] border border-[#eef1ef] bg-white px-4 py-3.5 text-[#111111] transition-colors hover:border-brand">
-      <span className="text-[15px] font-semibold">{label}</span>
-      <span className="text-[13px] text-gray-600">{text}</span>
+      <span className="text-[0.9375rem] font-semibold">{label}</span>
+      <span className="text-[0.8125rem] text-gray-600">{text}</span>
     </Link>
   );
 }

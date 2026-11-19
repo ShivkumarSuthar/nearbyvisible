@@ -224,7 +224,7 @@ export const faqGroups: { id: string; title: string; items: Faq[] }[] = [
       { q: "Can you guarantee the top position on Google?", a: "No one honestly can. Google decides the order. We follow Google’s rules and do the work that helps you rank higher and get chosen." },
       { q: "Will you post fake reviews?", a: "Never. Fake reviews can get a profile suspended. We help you collect real reviews from real customers with a simple link and routine." },
       { q: "Someone else controls our Google profile, or it is suspended. Can you help?", a: "Yes. We help you request access or appeal through Google’s own process. The final decision is Google’s, and we keep you updated." },
-      { q: "What is the Visibility Score?", a: "A free audit that tests your business across 180+ digital checkpoints — including your Google Business Profile, local 3-pack rank against competitors, website speed via Google Lighthouse, technical SEO, reviews, and AI search visibility. You get an instant score out of 100 with measured proof for every single point." },
+      { q: "What is the Visibility Score?", a: "A free check with 35+ tests on your Google Business Profile, your position against the top local businesses in your city, your website (speed via Google PageSpeed), technical SEO, reviews and AI visibility. You get a score out of 100 with the measured result behind every check." },
     ],
   },
   {
@@ -244,7 +244,7 @@ export const faqGroups: { id: string; title: string; items: Faq[] }[] = [
       { q: "How much does it cost?", a: "It depends on the services you choose. After a free review we send a written quote, item by item, so you see exactly what you pay for." },
       { q: "Is the Visibility Score really free?", a: "Yes. No payment and no obligation. If you want help fixing what it finds, you can message us." },
       { q: "How do payments work?", a: "Payment terms are written in your quote before any work starts, so there are no surprises." },
-      { q: "Are there monthly charges?", a: "Only if you choose a monthly plan, such as growth or maintenance. One-time work is charged once. Domain and hosting renew every year with the provider." },
+      { q: "Are there monthly charges?", a: "Only if you choose a monthly plan, such as growth or maintenance. One-time work is charged once. Domain and hosting are paid separately to the provider and renew every year." },
     ],
   },
   {
@@ -347,7 +347,7 @@ export const plans: Plan[] = [
     includes: [
       "Everything in Get Found",
       "A fast, mobile-first website",
-      "Domain, hosting and SSL in your name",
+      "Domain, hosting and SSL set up in your name (domain and hosting paid separately)",
       "Call and WhatsApp buttons on every page",
       "Google search setup and Search Console",
       "WhatsApp Business with catalogue and quick replies",
